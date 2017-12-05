@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>
+        HTML Imports
+    </title>
+    <script>
+        function handleLoad(e) 
+        {
+          console.log('Loaded import: ' + e.target.href);
+        }
+        function handleError(e) 
+        {
+          console.log('Error loading import: ' + e.target.href);
+        }
+      </script>
+
+      <!-- onload and onerror are only for testing, not necessary for production -->
+    <link rel="import" href="firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
+
+</head>
+
+<body>
+
+    <p>
+        <ul id="list">
+<!-- the ul tag serves only as a reference point to add into with JS -->
+        </ul>
+    </p>
+
+    <div id="scriptTarget"></div>
+    
+    <script>
+
+    function supportsImports() {
+    return 'import' in document.createElement('link');
+    }
+
+    if (!supportsImports()) {
+    // Good to go!
+    console.log('it is supported');
+    
+    var link = document.querySelector('link[rel="import"]');
+    var content = link.import;
+
+    var app = content.querySelector('#app');
+    var auth = content.querySelector('#auth');
+    var firebase = content.querySelector('#firebase');
+    var database = content.querySelector('#database');
+
+    var div = document.getElementById('scriptTarget');
+
+    div.appendChild(app.cloneNode(true));
+    div.appendChild(auth.cloneNode(true));
+    div.appendChild(firebase.cloneNode(true));
+    div.appendChild(database.cloneNode(true));
+    } else {
+    // Use other libraries/require systems to load files.
+    console.log('it is NOT supported');
+    }
+
+    
+    </script>
+
+    <script src="testBed.js"></script>
+
+
+  <!--  
+      
+    <div id="end-body"></div>
+<script src="firebaseSources.js"></script>
+<script src="testBed.js"></script> 
+
+-->
+</body>
+
+</html>
