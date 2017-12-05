@@ -3,7 +3,7 @@ function supportsImports() {
     return 'import' in document.createElement('link');
 }
 
-if (!supportsImports()) {
+if (supportsImports()) {
     // Good to go!
     console.log('it is supported');
 
