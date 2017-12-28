@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>
+        Success!
+    </title>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"> </script>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js">     </script>
+    <script>
+        
+        // Initialize Firebase
+        var config = {
+          apiKey: "AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs",
+          authDomain: "firsttest-e58df.firebaseapp.com",
+          databaseURL: "https://firsttest-e58df.firebaseio.com",
+          projectId: "firsttest-e58df",
+          storageBucket: "firsttest-e58df.appspot.com",
+          messagingSenderId: "795179805624"
+        };
+        firebase.initializeApp(config);
+    </script>
+    <script src="authUser.js"></script>
+</head>
+
+<body style="background-color:aqua;">
+
+<div>
+    <!-- successful log in message -->
+    <h1 style="text-align:center; color:green; margin-top:4em;"> Successful login! </h1>
+    <!-- log out button -->
+    <button id="logout" type="button" class="btn btn-large btn-block btn-default" style="margin: auto;">Log Out</button>
+    
+</div>
+
+<script>
+//log out button event handler
+document.getElementById('logout').onclick = logoutAction;
+//log out function
+function logoutAction()
+{
+    firebase.auth().signOut().then(function() {
+        // Sign-out successful.
+        //window.location = "login.html";
+    }).catch(function(error) {
+        // An error happened.
+        console.log('error on logout', error);
+    });
+}
+
+</script>
+
+</body>
+
+</html>
