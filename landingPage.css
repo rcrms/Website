@@ -7,9 +7,11 @@ a:link{
 }
 #content{
     width: 80%;
+    min-width: 485px;
+    max-width: 660px;
     margin: auto;
     padding: 5px;
-    background: white;
+    background: rgb(250,250,250);
     border-radius: 0.25em
 }
 #top{
@@ -25,6 +27,7 @@ a:link{
     margin-top: 30px;
     margin-bottom: 10px;
     border-radius: 0.5em;
+    background: #FFF;
 }
 .card:hover {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
@@ -33,6 +36,8 @@ a:link{
     display: flex;
 }
 .card > a > p{
+    margin-top: auto;
+    margin-bottom: auto;
     padding-left: 5px;
     width: 45px;
 }
