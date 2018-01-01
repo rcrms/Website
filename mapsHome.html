@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <title>Maps Home</title>
     <link rel="stylesheet" href="landingPage.css">
+    <link rel="stylesheet" href="mapsHome.css">
+    <script>
+        //get firebase dependencies ready
+        function handleLoad(e) 
+        {
+          console.log('Loaded import: ' + e.target.href);
+        }
+        function handleError(e) 
+        {
+          console.log('Error loading import: ' + e.target.href);
+        }
+      </script>
+
+      <!-- onload and onerror are only for testing, not necessary for production -->
+    <link rel="import" href="FBdependencies/firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
+
 </head>
 <body> 
     <div id="content">
@@ -15,30 +31,59 @@
             <div class="card" id="charts">
                 <a href="chartsHome.html">
                     <p>Charts</p>
-                    <img src="chartsIcon.png" alt="chart" height="40%" width="40%">
+                    <img id="chartIcon" src="chartsIcon.png" alt="chart">
                 </a>
             </div>
             
             <div class="card" id="maps">
                 <a href="mapsHome.html">
                         <p>Maps</p>
-                        <img src="mapsIcon.png" alt="chart" height="45%" width="45%">
+                        <img id="mapIcon" src="mapsIcon.png" alt="chart">
                     </a>
             </div>
 
             <div class="card" id="reports">
                 <a href="reportsHome.html">
                         <p>Reports</p>
-                        <img src="reportsIcon.png" alt="chart" height="40%" width="40%">
+                        <img id="reportIcon" src="reportsIcon.png" alt="chart">
                     </a>
             </div>
 
         </div>
 
         <br> <hr> <br>
-
-
+        <input type="button" value="center" onclick="centerMap()">
+        <div id="bottom">
+            <div id="map"></div>
+            <!-- <div id="floating-panel">
+            buttons on the top of the map
+            <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+            <button onclick="changeGradient()">Change gradient</button>
+            <button onclick="changeRadius()">Change radius</button>
+            <button onclick="changeOpacity()">Change opacity</button>
+            </div>
+        -->
+        <!-- form div is currently just a placeholder for firebase data -->
+            <div id="form"></div>
+        </div>
     </div>
-    
+    <script src="mapsHome.js"></script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs&libraries=visualization&callback=initMap">
+        //key="" is my testing API key  ends at red &
+        //AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs
+
+    </script>
+
+    <!-- provide getSources.js a location to add firebase dependencies -->
+    <div id="scriptTarget"></div>
+    <script src="FBdependencies/getSources.js"></script>
+    <!-- might not need the line below -->
+    <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+    <script src="mapsHome.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  
 </body>
 </html>
