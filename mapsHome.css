@@ -4,12 +4,18 @@
 #map { 
     /* adjust width and height here to alter size of map
     or perhaps just place it into the proper grid-template-areas */
-    position: sticky;
-    height: 400px;
-    width: 400px;
+    height: 300px;
+    width: 300px;
     /*float: right;*/
     margin: 10px;
     border-radius: 0.5rem;
+}
+#map2{   
+    height: 300px;
+    width: 300px;
+    margin: 10px;
+    border-radius: 0.5rem;
+
 }
 #floating-panel {
     position: absolute;
@@ -31,4 +37,12 @@
 #form{
     margin-left: auto;
     margin-right: auto;
+}
+#content{
+    display: flex;
+    flex-direction: column;
+}
+.hidden{
+    display: none;
+    visibility: hidden;
 }

@@ -55,6 +55,7 @@
         <input type="button" value="center" onclick="centerMap()">
         <div id="bottom">
             <div id="map"></div>
+            <div id="map2" class="hidden"></div>
             <!-- <div id="floating-panel">
             buttons on the top of the map
             <button onclick="toggleHeatmap()">Toggle Heatmap</button>
@@ -64,7 +65,13 @@
             </div>
         -->
         <!-- form div is currently just a placeholder for firebase data -->
+            <div>
+                <input type="button" value="Switch" onclick="toggleMaps()">
+                <input type="button" value="Info" onclick="getMapInfo()">
+            </div>
+            
             <div id="form"></div>
+
         </div>
     </div>
     <script src="mapsHome.js"></script>
