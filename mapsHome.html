@@ -52,10 +52,11 @@
         </div>
 
         <br> <hr> <br>
-        <input type="button" value="center" onclick="centerMap()">
+        
         <div id="bottom">
             <div id="map"></div>
             <div id="map2" class="hidden"></div>
+            
             <!-- <div id="floating-panel">
             buttons on the top of the map
             <button onclick="toggleHeatmap()">Toggle Heatmap</button>
@@ -65,32 +66,63 @@
             </div>
         -->
         <!-- form div is currently just a placeholder for firebase data -->
-            <div>
+            <div style="display: flex; flex-direction: column;">
+                <input type="button" value="center" onclick="centerMap()">
                 <input type="button" value="Switch" onclick="toggleMaps()">
                 <input type="button" value="Info" onclick="getMapInfo()">
             </div>
             
-            <div id="form"></div>
+            <div id="form">
 
-        </div>
-    </div>
+                <form id="customizePanel" onsubmit="return false">
+                    <fieldset>
+                        <legend>Customize</legend>
+                        <label>Complaint Types:</label><br>
+                            <input class="subItem" type="checkbox" name="complaints" id="pothole" value="pothole">
+                            <label for="pothole">pothole</label><br>
+        
+                            <input class="subItem" type="checkbox" name="complaints" id="obstruction" value="obstruction">
+                            <label for="obstruction">obstruction</label><br>
+                            
+                            <input class="subItem" type="checkbox" name="complaints" id="snow" value="snow">
+                            <label for="snow">snow</label><br><br>
+                        
+                        <label>Map Type:</label><br>
+                            <div id="mapToggle" class="subGroup">
+                                <label for="toggle" class="subItem">heatmap</label>
+                                <div class="toggle" id="mapTypeToggle">
+                                    <div class="slider"></div>
+                                </div><br>
+                            </div><br>
+        
+                        <label>Date Range</label><br>
+                            <div class="subGroup">
+                                <label for="fromDate" class="subItem">From: </label>
+                                <input type="date" name="fromDate" id="fromDate"><br>
+                            </div>
+                            <div class="subGroup">
+                                <label for="toDate" class="subItem">To: </label>
+                                <input type="date" name="toDate" id="toDate"><br>
+                            </div><br>
+                            
+                            <input id="formSubmit" type="submit" value="Submit" onclick="updateMap()">
+                    </fieldset>
+                </form>
+            </div><!-- end of form div -->
+        </div><!-- end of bottom div -->
+    </div><!-- end of content div -->
 
-
+    
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=getYourOwn&libraries=visualization&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs&libraries=visualization&callback=initMap">
         //key="" is my testing API key  ends at red &
+        //AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs
 
     </script>
 
     <!-- provide getSources.js a location to add firebase dependencies -->
     <div id="scriptTarget"></div>
     <script src="FBdependencies/getSources.js"></script>
-    <!-- might not need the line below -->
-    <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
     <script src="mapsHome.js"></script>
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-  
 </body>
 </html>

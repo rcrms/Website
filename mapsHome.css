@@ -1,21 +1,11 @@
-
-/* Always set the map height explicitly to define the size of the div
-* element that contains the map. */
-#map { 
-    /* adjust width and height here to alter size of map
-    or perhaps just place it into the proper grid-template-areas */
-    height: 300px;
-    width: 300px;
-    /*float: right;*/
+#map, #map2 { 
     margin: 10px;
     border-radius: 0.5rem;
-}
-#map2{   
-    height: 300px;
-    width: 300px;
-    margin: 10px;
-    border-radius: 0.5rem;
-
+    min-width: 300px;
+    height: auto;
+    max-width: 800px;
+    flex-basis: auto;
+    flex-grow: 1;
 }
 #floating-panel {
     position: absolute;
@@ -41,8 +31,56 @@
 #content{
     display: flex;
     flex-direction: column;
+    min-width: 650px;
 }
 .hidden{
     display: none;
     visibility: hidden;
+}
+#customizePanel{
+    flex: 1 1 auto;
+    margin: auto;
+}
+fieldset{
+    padding: 20px;
+    border-radius: 0.5rem;
+}
+.subItem{
+    margin-left: 20px;
+}
+.toggle{
+    height: 20px;
+    width: 42px;
+    background: lightgray;
+    border-radius: 2px;
+    padding: 2px;
+    float: right;
+
+}
+.slider{
+    height: 20px;
+    width: 20px;
+    background: red;
+    border-radius: 2px;
+    transition: all 300ms linear;
+}
+.slid{
+    transform: translateX(22px);
+    background: green; 
+}
+.subGroup{
+    padding-top: 5px;
+    width:100%;
+}
+#fromDate, #toDate{
+    float:right;
+}
+#customizePanel{
+    min-width: 235px;
+    margin: 10px;
+}
+#formSubmit{
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
 }

@@ -15,6 +15,7 @@ function centerMap(){
 var map, map2, heatmap, heatmap2;
 
 function initMap() {
+    //currently creating 2 different maps as an example of alternating between them
     map2 = new google.maps.Map(document.getElementById('map2'), {
         zoom: 10,
         center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
@@ -69,35 +70,27 @@ function changeOpacity() {
     heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
 }
 
-// // Heatmap data
-function getPoints() {
-    return [
-
-        new google.maps.LatLng(46.272431, -84.450658),
-        new google.maps.LatLng(46.272131, -84.450648),
-        new google.maps.LatLng(46.272651, -84.450458),
-        new google.maps.LatLng(46.271451, -84.450618),
-        new google.maps.LatLng(46.272751, -84.450651),
-        new google.maps.LatLng(46.272441, -84.450698),
-        new google.maps.LatLng(46.272851, -84.450858),
-        new google.maps.LatLng(46.272251, -84.451658),
-        new google.maps.LatLng(46.272481, -84.450258),
-        new google.maps.LatLng(46.272051, -84.450758)
-    ];
-}
 //endregion
 
 //endregion
-
 
 //firebase stuff
 //region
 
   // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs",
+            authDomain: "firsttest-e58df.firebaseapp.com",
+            databaseURL: "https://firsttest-e58df.firebaseio.com",
+            projectId: "firsttest-e58df",
+            storageBucket: "firsttest-e58df.appspot.com",
+            messagingSenderId: "795179805624"
+          };
+          firebase.initializeApp(config);
   
 var DBref = firebase.database().ref('mapsPageTest');
 
-var div = document.getElementById('form');
+// var div = document.getElementById('form');
 
 DBref.on('value', 
   //this func takes 3 arguements
@@ -108,10 +101,10 @@ DBref.on('value',
     {
         heatmap.getData().clear();
         heatmap2.getData().clear();
-        while (div.firstChild) 
-        {//removes all current children
-            div.removeChild(div.firstChild);
-        }
+        // while (div.firstChild) 
+        // {//removes all current children
+        //     div.removeChild(div.firstChild);
+        // }
         var allObj = data.val();//gets JSON obj of all data at the level provided by ref()
         var keys = Object.keys(allObj);//gets all keys for the same level
         
@@ -122,9 +115,9 @@ DBref.on('value',
             var lng = allObj[key].lng;//gets current obj name
 
             //console.log(lat, lng);
-            var p = document.createElement('p');
-            p.innerText = 'lat: ' + lat + ' lng: ' + lng;
-            div.appendChild(p);
+            // var p = document.createElement('p');
+            // p.innerText = 'lat: ' + lat + ' lng: ' + lng;
+            // div.appendChild(p);
 
             var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
             heatmap.getData().push(point);
@@ -140,7 +133,8 @@ DBref.on('value',
 
 //endregion
 
-
+//bottom stuff
+//region
 
 function toggleMaps(){
     var firstMap = document.getElementById('map');
@@ -175,3 +169,72 @@ function getMapInfo(){
     var eq = (map.getCenter() == map2.getCenter());
     console.log(eq);
 }
+
+//panel stuff
+//region
+
+//assign click listener to all toggles
+var classname = document.getElementsByClassName("toggle");
+
+var slideToggle = function() {
+    //get child div w/ class of slider
+    var slider = this.childNodes[1];
+    //toggle slid class to change desired properties
+    slider.classList.toggle("slid");  
+};
+
+for (var i = 0; i < classname.length; i++) {
+    classname[i].addEventListener('click', slideToggle, false);
+}
+
+function updateMap(){
+    // console.log('submit was pressed');
+    //array of all checkboxes in DOM
+    var cbs = document.querySelectorAll("input[type='checkbox']");
+    //values of all checkBoxes in DOM
+    var checkBoxValues = {};
+    // console.log(cbs);
+    for(var i = 0; i < cbs.length; i++){
+        //true/false value of checkbox
+        var currVal = cbs[i].checked;
+        //unique ID of checkbox
+        var currID = cbs[i].id;
+        // console.log(currVal, currID);
+        //store value associated with appropriate DOM ID
+        checkBoxValues[currID] = currVal;
+    }
+    //key        => value
+    //checkBoxID => valueOfCheckBox
+    console.log(checkBoxValues);
+
+    //get toggles values
+    //all toggles
+    var toggles = document.getElementsByClassName("toggle");
+    var toggleValues = {};
+
+    for(var i = 0; i < toggles.length; i++){
+        //get current toggle's slider child
+        currSlider = toggles[i].childNodes[1];
+        currToggleID = toggles[i].id;
+
+        if(currSlider.classList.contains("slid")){
+            //current toggle is ON
+            toggleValues[currToggleID] = true;
+        }else{
+            //current toggle is OFF
+            toggleValues[currToggleID] = false;            
+        }
+    }
+
+    console.log(toggleValues);
+
+    var fromDate = document.getElementById('fromDate');
+    var toDate = document.getElementById('toDate');
+    //dateObj.value returns a string in the format "YYYY-MM-DD"
+    //to assign value of a data picker -? dateObj.value = "2014-08-12";
+    console.log(fromDate.value, toDate.value);
+
+}
+//endregion
+
+//endregion
