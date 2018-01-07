@@ -5,24 +5,50 @@ function centerMap(){
     //center map on user location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
+            //data is found below, that's what initialLocation is set to
+            //lat: 46.2724099
+            //lng: -84.45063669999999
             initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            map.setCenter(initialLocation);
-            map2.setCenter(initialLocation);
+            heatmapMap.setCenter(initialLocation);
+            markerMap.setCenter(initialLocation);
         });
     }
 }
 
-var map, map2, heatmap, heatmap2;
+//global map vars so they can be accessed elsewhere
+var heatmapMap, heatmap, markerMap, markers, markerClusterer;
 
 function initMap() {
-    //currently creating 2 different maps as an example of alternating between them
-    map2 = new google.maps.Map(document.getElementById('map2'), {
-        zoom: 10,
+
+// clustered markers map variables
+
+    markerMap = new google.maps.Map(document.getElementById('map2'),{
+        zoom: 17,
         center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
         mapTypeId: 'roadmap' //options: roadmap, satellite, hybrid, terrain
     });
+    
+    var markers = [];
 
-    map = new google.maps.Map(document.getElementById('map'), {
+    //hardcoded marker clusterer example
+    // var point = new google.maps.LatLng(46.493990, -84.362769);
+    // var marker = new google.maps.Marker({'position': point});
+    // markers.push(marker);
+
+    // var point2 = new google.maps.LatLng(46.493990, -84.362969);
+    // var marker2 = new google.maps.Marker({'position': point2});
+    // markers.push(marker2);
+
+    // Add a marker clusterer to manage the markers.
+    var opt = {
+        averageCenter: true,
+        gridSize: 45
+    };
+    markerClusterer = new MarkerClusterer(markerMap, [], opt);
+ 
+// heatmap variables
+
+    heatmapMap = new google.maps.Map(document.getElementById('map'), {
         zoom: 17,
         center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
         mapTypeId: 'hybrid' //options: roadmap, satellite, hybrid, terrain
@@ -30,16 +56,12 @@ function initMap() {
 
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: [],
-        map: map
-    });
-    heatmap2 = new google.maps.visualization.HeatmapLayer({
-        data: [],
-        map: map2
+        map: heatmapMap
     });
 }
 //region
 function toggleHeatmap() {
-    heatmap.setMap(heatmap.getMap() ? null : map);
+    heatmap.setMap(heatmap.getMap() ? null : heatmapMap);
 }
 
 function changeGradient() {
@@ -100,11 +122,8 @@ DBref.on('value',
     function gotData(data)
     {
         heatmap.getData().clear();
-        heatmap2.getData().clear();
-        // while (div.firstChild) 
-        // {//removes all current children
-        //     div.removeChild(div.firstChild);
-        // }
+        markerClusterer.clearMarkers();
+        
         var allObj = data.val();//gets JSON obj of all data at the level provided by ref()
         var keys = Object.keys(allObj);//gets all keys for the same level
         
@@ -114,17 +133,14 @@ DBref.on('value',
             var lat = allObj[key].lat;//gets current obj name
             var lng = allObj[key].lng;//gets current obj name
 
-            //console.log(lat, lng);
-            // var p = document.createElement('p');
-            // p.innerText = 'lat: ' + lat + ' lng: ' + lng;
-            // div.appendChild(p);
-
             var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
             heatmap.getData().push(point);
-            heatmap2.getData().push(point);
+            var marker = new google.maps.Marker({'position': point});
+            markerClusterer.addMarker(marker);
         }
-        console.log('heatmap1 data', heatmap.getData());
-        console.log('heatmap2 data', heatmap2.getData());
+        console.log('heatmap data', heatmap.getData());
+        console.log('markerMap data', markerClusterer.getMarkers());
+        console.log('markerClusterer grid size:', markerClusterer.getGridSize());
     },
 
     function gotError(e){
@@ -137,77 +153,72 @@ DBref.on('value',
 //region
 
 function toggleMaps(){
+//handles switching which of the two maps maintained is visible
+//upon switching maps, their center and zoom properties are synced
+//try playing with their Z-index properties to avoid the trigger(map, 'resize') syntax
     var firstMap = document.getElementById('map');
-    var secondMap = document.getElementById('map2');
+    var secondMap = document.getElementById('map2');//not used - could test the if below with both div class checks
 
     if(firstMap.classList.contains('hidden')){
         //firstMap is currently hidden, update its info with info from secondMap before switching them
-        map.setZoom(map2.getZoom() );
-        map.setCenter(map2.getCenter() );
+        heatmapMap.setZoom(markerMap.getZoom() );
+        heatmapMap.setCenter(markerMap.getCenter() );
     }else{
         //secondMap is currently hidden, update its info with info from firstMap before switching them
-        map2.setZoom(map.getZoom() );
-        map2.setCenter(map.getCenter() );
+        markerMap.setZoom(heatmapMap.getZoom() );
+        markerMap.setCenter(heatmapMap.getCenter() );
     }
     //switch which map is visible
     document.getElementById('map').classList.toggle('hidden');
     document.getElementById('map2').classList.toggle('hidden');
     //hold current map centers
-    var m1center = map.getCenter();
-    var m2center = map2.getCenter();
+    var m1center = heatmapMap.getCenter();
+    var m2center = markerMap.getCenter();
     //redraw maps
-    google.maps.event.trigger(map, 'resize');
-    google.maps.event.trigger(map2, 'resize');
+    google.maps.event.trigger(heatmapMap, 'resize');
+    google.maps.event.trigger(markerMap, 'resize');
     //reset centers
-    map.setCenter(m1center);
-    map2.setCenter(m2center);
+    heatmapMap.setCenter(m1center);
+    markerMap.setCenter(m2center);
 }
 function getMapInfo(){
     console.clear();
-    console.log("map1", map.getCenter().toString(), map.getZoom());
-    console.log("map2", map2.getCenter().toString(), map2.getZoom());
-    var eq = (map.getCenter() == map2.getCenter());
+    console.log("map1", heatmapMap.getCenter().toString(), map.getZoom());
+    console.log("map2", markerMap.getCenter().toString(), map2.getZoom());
+    var eq = (heatmapMap.getCenter() == markerMap.getCenter());
     console.log(eq);
 }
 
 //panel stuff
 //region
 
-//assign click listener to all toggles
-var classname = document.getElementsByClassName("toggle");
-
-var slideToggle = function() {
+function slideToggle() {
     //get child div w/ class of slider
-    var slider = this.childNodes[1];
+    var slider = document.getElementById("mapTypeSlider");
     //toggle slid class to change desired properties
-    slider.classList.toggle("slid");  
-};
-
-for (var i = 0; i < classname.length; i++) {
-    classname[i].addEventListener('click', slideToggle, false);
+    slider.classList.toggle("slid"); 
+    toggleMaps(); 
 }
 
 function updateMap(){
-    // console.log('submit was pressed');
+//currently this func only logs results of the customize panel, but the end goal
+//of this func is to alter the contents of the maps
     //array of all checkboxes in DOM
     var cbs = document.querySelectorAll("input[type='checkbox']");
     //values of all checkBoxes in DOM
     var checkBoxValues = {};
-    // console.log(cbs);
+
     for(var i = 0; i < cbs.length; i++){
         //true/false value of checkbox
         var currVal = cbs[i].checked;
         //unique ID of checkbox
         var currID = cbs[i].id;
-        // console.log(currVal, currID);
         //store value associated with appropriate DOM ID
         checkBoxValues[currID] = currVal;
     }
-    //key        => value
-    //checkBoxID => valueOfCheckBox
     console.log(checkBoxValues);
 
-    //get toggles values
+    //get toggles values - if there only ends up being one, simplify this code
     //all toggles
     var toggles = document.getElementsByClassName("toggle");
     var toggleValues = {};
@@ -225,7 +236,6 @@ function updateMap(){
             toggleValues[currToggleID] = false;            
         }
     }
-
     console.log(toggleValues);
 
     var fromDate = document.getElementById('fromDate');

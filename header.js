@@ -27,7 +27,7 @@ title.style.color = "white";
 title.style.margin = "auto";
 //img tag
 var home = document.createElement('img');
-home.setAttribute('src', 'home.png');
+home.setAttribute('src', 'images/home.png');
 home.setAttribute('alt', 'home');
 home.style.height = 25 + 'px';
 home.style.width = 25 + 'px';
