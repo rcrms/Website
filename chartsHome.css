@@ -1,0 +1,25 @@
+#bottom{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 10px;
+}
+#canvasHolder{
+    width: 85%;
+    max-width: 650px;
+}
+#buttonHolder{
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
+}
+.chartButton{
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    width: 100%;
+}
+.chartButton:hover{
+    cursor: pointer;
+}

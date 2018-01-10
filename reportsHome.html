@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <title>Reports Home</title>
     <link rel="stylesheet" href="landingPage.css">
+    <link rel="stylesheet" href="reportsHome.css">
 </head>
 <body> 
+    <script src="reportsHome.js"></script>
     <div id="content">
         <div id="header">
             <script src="header.js"></script>
@@ -37,8 +40,62 @@
 
         <br> <hr> <br>
 
+        <div id="bottom">
 
-    </div>
-    
+            <form id="customizePanel" onsubmit="return false">
+
+                <fieldset id="dataFieldset">
+                    <legend>Customize Report</legend>
+                    <div id="formSplitter">
+                        <div id="formLeft">
+                            <label id="complaintTypeLabel">Complaint Types:</label><br>
+                                <input class="subItem" type="checkbox" name="complaints" id="pothole" value="pothole">
+                                <label for="pothole">pothole</label><br>
+                
+                                <input class="subItem" type="checkbox" name="complaints" id="obstruction" value="obstruction">
+                                <label for="obstruction">obstruction</label><br>
+                                
+                                <input class="subItem" type="checkbox" name="complaints" id="snow" value="snow">
+                                <label for="snow">snow</label><br><br>
+                
+                            <label>Date Range:</label><br>
+                                <div class="subGroup">
+                                    <label id="fromDateLabel" for="fromDate" class="subItem">From: </label>
+                                    <input type="date" name="fromDate" id="fromDate"><br>
+                                </div>
+                                <div class="subGroup">
+                                    <label id="toDateLabel" for="toDate" class="subItem">To: </label>
+                                    <input type="date" name="toDate" id="toDate"><br>
+                                </div>
+                        </div>
+                        <div id="formRight">
+
+                            <label id="groupByLabel">Group By:</label><br>
+                                <input class="subItem" type="radio" name="groupBy" id="groupByDay">
+                                <label for="groupByDay">Day</label><br>
+                    
+                                <input class="subItem" type="radio" name="groupBy" id="groupByWeek">
+                                <label for="groupByWeek">Week</label><br>
+                    
+                                <input class="subItem" type="radio" name="groupBy" id="groupByMonth">
+                                <label for="groupByMonth">Month</label><br>
+                    
+                                <input class="subItem" type="radio" name="groupBy" id="groupByYear">
+                                <label for="groupByYear">Year</label><br>
+                        </div>
+                    </div>
+                </fieldset>
+                <br>
+                <input id="submitBtn" type="submit" value="Submit" onclick="submitForm()">
+            </form>
+      
+        </div><!-- end of bottom div -->
+
+    </div><!-- end of content div -->
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+    <script async defer src="https://apis.google.com/js/platform.js"></script>
 </body>
 </html>

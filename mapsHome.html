@@ -67,9 +67,8 @@
         -->
         <!-- form div is currently just a placeholder for firebase data -->
             <div style="display: flex; flex-direction: column;">
-                <input type="button" value="Center" onclick="centerMap()">
-                <input type="button" value="Switch" onclick="toggleMaps()">
-                <input type="button" value="Info" onclick="getMapInfo()">
+                <input type="button" class="hidden" value="Switch" onclick="toggleMaps()">
+                <input type="button" class="hidden" value="Info" onclick="getMapInfo()">
             </div>
             
             <div id="form">
@@ -77,6 +76,9 @@
                 <form id="customizePanel" onsubmit="return false">
                     <fieldset>
                         <legend>Customize</legend>
+
+                        <input type="button" value="Center" onclick="centerMap()"><br><br>
+
                         <label>Complaint Types:</label><br>
                             <input class="subItem" type="checkbox" name="complaints" id="pothole" value="pothole">
                             <label for="pothole">pothole</label><br>

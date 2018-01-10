@@ -15,6 +15,10 @@ function centerMap(){
     }
 }
 
+function getLocation(){
+    return {lat: 46.493990, lng: -84.362969};
+}
+
 //global map vars so they can be accessed elsewhere
 var heatmapMap, heatmap, markerMap, markers, markerClusterer;
 
@@ -24,27 +28,23 @@ function initMap() {
 
     markerMap = new google.maps.Map(document.getElementById('map2'),{
         zoom: 17,
-        center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
+        center: getLocation(), 
+            //{lat: 46.493990, lng: -84.362969} //middle of CAS
         mapTypeId: 'roadmap' //options: roadmap, satellite, hybrid, terrain
     });
     
     var markers = [];
-
-    //hardcoded marker clusterer example
-    // var point = new google.maps.LatLng(46.493990, -84.362769);
-    // var marker = new google.maps.Marker({'position': point});
-    // markers.push(marker);
-
-    // var point2 = new google.maps.LatLng(46.493990, -84.362969);
-    // var marker2 = new google.maps.Marker({'position': point2});
-    // markers.push(marker2);
-
     // Add a marker clusterer to manage the markers.
     var opt = {
         averageCenter: true,
         gridSize: 45
     };
     markerClusterer = new MarkerClusterer(markerMap, [], opt);
+    
+
+    //USE ANOTHER VERSION OF THE MARKERCLUSTERER - MARKERCLUSTERERPLUS
+    //https://htmlpreview.github.io/?https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/docs/examples.html
+    //http://htmlpreview.github.io/?https://github.com/googlemaps/v3-utility-library/blob/master/markerclustererplus/docs/reference.html
  
 // heatmap variables
 
@@ -130,19 +130,23 @@ DBref.on('value',
         for(i = 0; i < keys.length; i++)
         {
             var key = keys[i];//gets current key - submissionID
-            var lat = allObj[key].lat;//gets current obj name
-            var lng = allObj[key].lng;//gets current obj name
+            var lat = allObj[key].lat;//gets current obj lat
+            var lng = allObj[key].lng;//gets current obj lng
 
             var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
             heatmap.getData().push(point);
             var marker = new google.maps.Marker({'position': point});
+            //add click listener to above newly created marker
+            marker.addListener('click', function(){
+                console.log("I am here:", this.getPosition().lat(), this.getPosition().lng());
+            });
             markerClusterer.addMarker(marker);
         }
         console.log('heatmap data', heatmap.getData());
         console.log('markerMap data', markerClusterer.getMarkers());
         console.log('markerClusterer grid size:', markerClusterer.getGridSize());
-    },
 
+    },
     function gotError(e){
         console.log("Error", e);
     });
@@ -162,11 +166,11 @@ function toggleMaps(){
     if(firstMap.classList.contains('hidden')){
         //firstMap is currently hidden, update its info with info from secondMap before switching them
         heatmapMap.setZoom(markerMap.getZoom() );
-        heatmapMap.setCenter(markerMap.getCenter() );
+        heatmapMap.panTo(markerMap.getCenter() );
     }else{
         //secondMap is currently hidden, update its info with info from firstMap before switching them
         markerMap.setZoom(heatmapMap.getZoom() );
-        markerMap.setCenter(heatmapMap.getCenter() );
+        markerMap.panTo(heatmapMap.getCenter() );
     }
     //switch which map is visible
     document.getElementById('map').classList.toggle('hidden');
@@ -178,8 +182,8 @@ function toggleMaps(){
     google.maps.event.trigger(heatmapMap, 'resize');
     google.maps.event.trigger(markerMap, 'resize');
     //reset centers
-    heatmapMap.setCenter(m1center);
-    markerMap.setCenter(m2center);
+    heatmapMap.panTo(m1center);
+    markerMap.panTo(m2center);
 }
 function getMapInfo(){
     console.clear();
