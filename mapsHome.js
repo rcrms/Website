@@ -1,5 +1,5 @@
 
-//map stuff
+//map init stuff
 //region
 function centerMap(){
     //center map on user location
@@ -16,11 +16,11 @@ function centerMap(){
 }
 
 function getLocation(){
-    return {lat: 46.493990, lng: -84.362969};
+    return {lat: 46.272131, lng: -84.450648};
 }
 
 //global map vars so they can be accessed elsewhere
-var heatmapMap, heatmap, markerMap, markers, markerClusterer;
+var heatmapMap, heatmap, markerMap, markers, markerClusterer, lastInfoWindow;
 
 function initMap() {
 
@@ -50,7 +50,8 @@ function initMap() {
 
     heatmapMap = new google.maps.Map(document.getElementById('map'), {
         zoom: 17,
-        center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
+        center: getLocation(),
+        // center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
         mapTypeId: 'hybrid' //options: roadmap, satellite, hybrid, terrain
     });
 
@@ -96,19 +97,35 @@ function changeOpacity() {
 
 //endregion
 
+//use this to create the button in the infowindow which passes its ID to its onClick function
+function htmlToElement(html) {
+    var template = document.createElement('template');
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+    return template.content.firstChild;
+}
+function handleMarkerDelete(complaintID){
+    console.log("handleMarkerDelete()", complaintID);
+
+    if(window.confirm("Are you sure you want to remove this complaint?")){
+        var whereToDelete = 'mapsPageTest/' + complaintID;
+        firebase.database().ref(whereToDelete).remove()
+        .then(function() {
+            console.log("Removed " + complaintID);
+        })
+        .catch(function(error) {
+            console.log("Remove failed: " + error.message);
+        });
+    } else {
+        console.log("you did not want to delete " + complaintID);
+    }
+
+}
+
 //firebase stuff
 //region
 
   // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyCQTQUHVnUhGfSHjRfYLYvWU18fvbITFMs",
-            authDomain: "firsttest-e58df.firebaseapp.com",
-            databaseURL: "https://firsttest-e58df.firebaseio.com",
-            projectId: "firsttest-e58df",
-            storageBucket: "firsttest-e58df.appspot.com",
-            messagingSenderId: "795179805624"
-          };
-          firebase.initializeApp(config);
   
 var DBref = firebase.database().ref('mapsPageTest');
 
@@ -121,6 +138,7 @@ DBref.on('value',
     //error handler
     function gotData(data)
     {
+        //clear any previous data held by the maps
         heatmap.getData().clear();
         markerClusterer.clearMarkers();
         
@@ -128,24 +146,86 @@ DBref.on('value',
         var keys = Object.keys(allObj);//gets all keys for the same level
         
         for(i = 0; i < keys.length; i++)
-        {
+        {//set up marker for each complaint in database
             var key = keys[i];//gets current key - submissionID
             var lat = allObj[key].lat;//gets current obj lat
             var lng = allObj[key].lng;//gets current obj lng
 
             var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
             heatmap.getData().push(point);
-            var marker = new google.maps.Marker({'position': point});
-            //add click listener to above newly created marker
-            marker.addListener('click', function(){
-                console.log("I am here:", this.getPosition().lat(), this.getPosition().lng());
-            });
+
+            var marker = new google.maps.Marker({'position': point, 'title': key});
+
+            marker.addListener('click', function(arg) {
+
+                if(lastInfoWindow){ //close the previously open infowindow
+                    lastInfoWindow.close();
+                }
+                // console.log('markerListener arg', arg)
+                var myPos = { //hold clicked marker location
+                    lat: Number(parseFloat(this.getPosition().lat() ).toFixed(6) ), 
+                    lng: Number(parseFloat(this.getPosition().lng() ).toFixed(6) )
+                };
+
+                var markerTitle = this.getTitle();
+                //button inside infowindow
+                var buttonHTML = '<input type="button" value="Delete"' +
+                    ' onclick="handleMarkerDelete(\'' + markerTitle + '\')">';
+                var infowindowButton = htmlToElement(buttonHTML);
+                //the rest of the content of infowindow
+                var content = "My lat: " + myPos.lat + "<br>" + 
+                              "My lng: " + myPos.lng + "<br>" +
+                              "Me: " + markerTitle + "<br><br>" + 
+                              infowindowButton.outerHTML;   
+
+                //center map on marker
+                markerMap.panTo(myPos);
+                // console.log('myPos', myPos);
+
+                //start reverse geocoding
+                var geocoder = new google.maps.Geocoder;
+                var markerAddress = {};
+                geocoder.geocode({'location': myPos}, function(results, status) {
+                    if (status === 'OK') {
+                      if (results[0]) {
+                          //grabs markers reverse geocoded address
+                        markerAddress.number = results[0].address_components[0].short_name;
+                        markerAddress.street = results[0].address_components[1].short_name;
+                        markerAddress.town   = results[0].address_components[2].short_name;
+
+                        console.log('markerAddress', markerAddress);
+
+                        content += " <br><br>" + markerAddress.number + "<br>" +
+                                    markerAddress.street + "<br>" + markerAddress
+                        
+                      } else {
+                        window.alert('No results found');
+                      }
+                    } else {
+                      window.alert('Geocoder failed due to: ' + status);
+                    }
+                  });//end of geocoder.geocode()  
+                  
+                  
+                //actual infowindow obj
+                var infowindow = new google.maps.InfoWindow({
+                    content: content
+                });
+                infowindow.open(markerMap, this);
+                //save newly created infowindow to be closed upon another marker's click
+                lastInfoWindow = infowindow;
+
+                  console.log('markerAddress after geocoder', markerAddress);             
+            });//end of marker click listener
+
+            //add newly created marker to its map
             markerClusterer.addMarker(marker);
         }
-        console.log('heatmap data', heatmap.getData());
-        console.log('markerMap data', markerClusterer.getMarkers());
-        console.log('markerClusterer grid size:', markerClusterer.getGridSize());
+        // console.log('heatmap data', heatmap.getData());
+        // console.log('markerMap data', markerClusterer.getMarkers());
+        // console.log('markerClusterer grid size:', markerClusterer.getGridSize());
 
+        //end of gotData() for firebase database connection
     },
     function gotError(e){
         console.log("Error", e);
@@ -184,13 +264,6 @@ function toggleMaps(){
     //reset centers
     heatmapMap.panTo(m1center);
     markerMap.panTo(m2center);
-}
-function getMapInfo(){
-    console.clear();
-    console.log("map1", heatmapMap.getCenter().toString(), map.getZoom());
-    console.log("map2", markerMap.getCenter().toString(), map2.getZoom());
-    var eq = (heatmapMap.getCenter() == markerMap.getCenter());
-    console.log(eq);
 }
 
 //panel stuff

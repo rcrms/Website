@@ -4,11 +4,30 @@
     <meta charset="UTF-8">
 
     <title>Reports Home</title>
+    <script>
+        //get firebase dependencies ready
+        function handleLoad(e) 
+        {
+          console.log('Loaded import: ' + e.target.href);
+        }
+        function handleError(e) 
+        {
+          console.log('Error loading import: ' + e.target.href);
+        }
+      </script>
+
+      <!-- onload and onerror are only for testing, not necessary for production -->
+    <link rel="import" href="FBdependencies/firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
+
+    <!-- provide getSources.js a location to add firebase dependencies -->
+    <div id="scriptTarget"></div>
+    <script src="FBdependencies/getSources.js"></script>
+    <script src="authUser.js"></script>
+
     <link rel="stylesheet" href="landingPage.css">
     <link rel="stylesheet" href="reportsHome.css">
 </head>
 <body> 
-    <script src="reportsHome.js"></script>
     <div id="content">
         <div id="header">
             <script src="header.js"></script>
@@ -92,6 +111,8 @@
         </div><!-- end of bottom div -->
 
     </div><!-- end of content div -->
+
+    <script src="reportsHome.js"></script>
     <script async defer src="https://apis.google.com/js/api.js"
       onload="this.onload=function(){};handleClientLoad()"
       onreadystatechange="if (this.readyState === 'complete') this.onload()">

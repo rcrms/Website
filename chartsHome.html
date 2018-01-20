@@ -3,9 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Charts Home</title>
+    <script>
+        //get firebase dependencies ready
+        function handleLoad(e) 
+        {
+          console.log('Loaded import: ' + e.target.href);
+        }
+        function handleError(e) 
+        {
+          console.log('Error loading import: ' + e.target.href);
+        }
+      </script>
+
+      <!-- onload and onerror are only for testing, not necessary for production -->
+    <link rel="import" href="FBdependencies/firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
+
+    <!-- provide getSources.js a location to add firebase dependencies -->
+    <div id="scriptTarget"></div>
+    <script src="FBdependencies/getSources.js"></script>
+    <script src="authUser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
+
     <link rel="stylesheet" href="landingPage.css">
     <link rel="stylesheet" href="chartsHome.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
 </head>
 <body> 
     <div id="content">

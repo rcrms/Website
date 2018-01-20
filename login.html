@@ -16,26 +16,36 @@
             margin: 1em 0em 1em 10em;
         }
     </style>
+    <script>
+        //get firebase dependencies ready
+        function handleLoad(e) 
+        {
+          console.log('Loaded import: ' + e.target.href);
+        }
+        function handleError(e) 
+        {
+          console.log('Error loading import: ' + e.target.href);
+        }
+      </script>
 
-<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"> </script>
-<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js">     </script>
-<script>
-    
-    // Initialize Firebase
-    
-</script>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"> </script>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js">     </script>
+    <link rel="import" href="FBdependencies/firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
+
+    <div id="scriptTarget"></div>
+    <script src="FBdependencies/getSources.js"></script>
+    <script src="login.js"></script>
 </head>
 
 <body>
     <div id="main-content">
-        <input type="email" id="txtEmail" placeholder="Email">
-        <br>  
-        <input type="password" id="txtPass" placeholder="Password">
-        <br>
-        <button id="btnLogIn">Log In</button>
+            <input type="email" id="txtEmail" placeholder="Email">
+            <br>  
+            <input type="password" id="txtPass" placeholder="Password">
+            <br>
+            <button id="btnLogIn" onclick="logInPressed()">Log In</button>
     </div>
 
-<script src="login.js">                                                 </script>
 
 </body>
 
