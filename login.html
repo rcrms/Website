@@ -6,16 +6,6 @@
         Log In
     </title>
 
-    <style>
-        #main-content > input{
-                margin: 1em 0em 1em 10em;
-                height: 3em;
-                width: 25em;
-            }
-        #main-content > button{
-            margin: 1em 0em 1em 10em;
-        }
-    </style>
     <script>
         //get firebase dependencies ready
         function handleLoad(e) 
@@ -28,22 +18,24 @@
         }
       </script>
 
-    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"> </script>
-    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js">     </script>
-    <link rel="import" href="FBdependencies/firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
+    <!-- <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"> </script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js">     </script> -->
+    <link rel="import" href="firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
 
     <div id="scriptTarget"></div>
-    <script src="FBdependencies/getSources.js"></script>
+    <script src="getSources.js"></script>
     <script src="login.js"></script>
 </head>
 
 <body>
     <div id="main-content">
+        <form onsubmit="return false">
             <input type="email" id="txtEmail" placeholder="Email">
-            <br>  
+            <br><br>
             <input type="password" id="txtPass" placeholder="Password">
-            <br>
-            <button id="btnLogIn" onclick="logInPressed()">Log In</button>
+            <br><br>
+            <button id="btnLogIn" type="submit" onclick="logInPressed()">Log In</button>
+        </form>
     </div>
 
 

@@ -26,4 +26,3 @@ if (!supportsImports()) {
     console.log('it is NOT supported');
 }
 
-    
