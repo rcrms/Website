@@ -3,25 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Maps Home</title>
-    <script>
-        //get firebase dependencies ready
-        function handleLoad(e) 
-        {
-          console.log('Loaded import: ' + e.target.href);
-        }
-        function handleError(e) 
-        {
-          console.log('Error loading import: ' + e.target.href);
-        }
-      </script>
-
-      <!-- onload and onerror are only for testing, not necessary for production -->
-    <link rel="import" href="firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
-
-
-    <!-- provide getSources.js a location to add firebase dependencies -->
-    <div id="scriptTarget"></div>
-    <script src="getSources.js"></script>
+    <link rel="icon" href="images/maps-favicon.ico">
+    
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
 
     <link rel="stylesheet" href="landingPage.css">
     <link rel="stylesheet" href="mapsHome.css">
@@ -72,11 +59,6 @@
             <button onclick="changeOpacity()">Change opacity</button>
             </div>
         -->
-        <!-- form div is currently just a placeholder for firebase data -->
-            <div style="display: flex; flex-direction: column;">
-                <input type="button" class="hidden" value="Switch" onclick="toggleMaps()">
-                <input type="button" class="hidden" value="Info" onclick="getMapInfo()">
-            </div>
             
             <div id="form">
 
@@ -84,18 +66,9 @@
                     <fieldset>
                         <legend>Customize</legend>
 
-                        <input type="button" value="Center" onclick="centerMap()"><br><br>
+                        <input type="button" value="Center" onclick="centerMap()"><br>
+                        <input type="button" value="Toggle Data" onclick="toggleHeatmap()" disabled="true" id="toggleHeatmapButton"><br><br>
 
-                        <label>Complaint Types:</label><br>
-                            <input class="subItem" type="checkbox" name="complaints" id="pothole" value="pothole">
-                            <label for="pothole">pothole</label><br>
-        
-                            <input class="subItem" type="checkbox" name="complaints" id="obstruction" value="obstruction">
-                            <label for="obstruction">obstruction</label><br>
-                            
-                            <input class="subItem" type="checkbox" name="complaints" id="snow" value="snow">
-                            <label for="snow">snow</label><br><br>
-                        
                         <label>Map Type:</label><br>
                             <div id="mapToggle" class="subGroup">
                                 <label for="toggle" class="subItem">heatmap</label>
@@ -103,6 +76,105 @@
                                     <div class="slider" id="mapTypeSlider"></div>
                                 </div><br>
                             </div><br>
+                        <label id="dataTypeLabel">Data Type:</label>
+                            <div class="subGroup">
+                                <input class="subItem" type="radio" name="dataType" id="dataTypeAll" checked="checked">
+                                <label for="dataTypeAll">All</label><br>
+
+                                <input class="subItem" type="radio" name="dataType" id="dataTypeResolved">
+                                <label for="dataTypeResolved">Resolved</label><br>
+                    
+                                <input class="subItem" type="radio" name="dataType" id="dataTypeUnresolved">
+                                <label for="dataTypeUnresolved">Unresolved</label><br><br>
+                    
+                            </div>
+                        <label id="countyLabel">County:</label>
+                            <select name="countySelect" id="countySelect" class="subItem">
+                                <option value="All">All</option>
+                                <option value="Alcona">Alcona</option>
+                                <option value="Alger">Alger</option>
+                                <option value="Allegan">Allegan</option>
+                                <option value="Alpena">Alpena</option>
+                                <option value="Antrim">Antrim</option>
+                                <option value="Arenac">Arenac</option>
+                                <option value="Baraga">Baraga</option>
+                                <option value="Barry">Barry</option>
+                                <option value="Bay">Bay</option>
+                                <option value="Benzie">Benzie</option>
+                                <option value="Berrien">Berrien</option>
+                                <option value="Branch">Branch</option>
+                                <option value="Calhoun">Calhoun</option>
+                                <option value="Cass">Cass</option>
+                                <option value="Charlevoix">Charlevoix</option>
+                                <option value="Cheboygan">Cheboygan</option>
+                                <option value="Chippewa">Chippewa</option>
+                                <option value="Clare">Clare</option>
+                                <option value="Clinton">Clinton</option>
+                                <option value="Crawford">Crawford</option>
+                                <option value="Delta">Delta</option>
+                                <option value="Dickinson">Dickinson</option>
+                                <option value="Eaton">Eaton</option>
+                                <option value="Emmet">Emmet</option>
+                                <option value="Genesee">Genesee</option>
+                                <option value="Gladwin">Gladwin</option>
+                                <option value="Gogebic">Gogebic</option>
+                                <option value="Grand Traverse">Grand Traverse</option>
+                                <option value="Gratiot">Gratiot</option>
+                                <option value="Hillsdale">Hillsdale</option>
+                                <option value="Houghton">Houghton</option>
+                                <option value="Huron">Huron</option>
+                                <option value="Ingham">Ingham</option>
+                                <option value="Ionia">Ionia</option>
+                                <option value="Iosco">Iosco</option>
+                                <option value="Iron">Iron</option>
+                                <option value="Isabella">Isabella</option>
+                                <option value="Jackson">Jackson</option>
+                                <option value="Kalamazoo">Kalamazoo</option>
+                                <option value="Kalkaska">Kalkaska</option>
+                                <option value="Kent">Kent</option>
+                                <option value="Keweenaw">Keweenaw</option>
+                                <option value="Lake">Lake</option>
+                                <option value="Lapeer">Lapeer</option>
+                                <option value="Leelanau">Leelanau</option>
+                                <option value="Lenawee">Lenawee</option>
+                                <option value="Livingston">Livingston</option>
+                                <option value="Luce">Luce</option>
+                                <option value="Mackinac">Mackinac</option>
+                                <option value="Macomb">Macomb</option>
+                                <option value="Manistee">Manistee</option>
+                                <option value="Marquette">Marquette</option>
+                                <option value="Mason">Mason</option>
+                                <option value="Mecosta">Mecosta</option>
+                                <option value="Menominee">Menominee</option>
+                                <option value="Midland">Midland</option>
+                                <option value="Missaukee">Missaukee</option>
+                                <option value="Monroe">Monroe</option>
+                                <option value="Montcalm">Montcalm</option>
+                                <option value="Montmorency">Montmorency</option>
+                                <option value="Muskegon">Muskegon</option>
+                                <option value="Newaygo">Newaygo</option>
+                                <option value="Oakland">Oakland</option>
+                                <option value="Oceana">Oceana</option>
+                                <option value="Ogemaw">Ogemaw</option>
+                                <option value="Ontonagon">Ontonagon</option>
+                                <option value="Osceola">Osceola</option>
+                                <option value="Oscoda">Oscoda</option>
+                                <option value="Otsego">Otsego</option>
+                                <option value="Ottawa">Ottawa</option>
+                                <option value="Presque Isle">Presque Isle</option>
+                                <option value="Roscommon">Roscommon</option>
+                                <option value="Saginaw">Saginaw</option>
+                                <option value="St. Clair">St. Clair</option>
+                                <option value="St. Joseph">St. Joseph</option>
+                                <option value="Sanilac">Sanilac</option>
+                                <option value="Schoolcraft">Schoolcraft</option>
+                                <option value="Shiawassee">Shiawassee</option>
+                                <option value="Tuscola">Tuscola</option>
+                                <option value="Van Buren">Van Buren</option>
+                                <option value="Washtenaw">Washtenaw</option>
+                                <option value="Wayne">Wayne</option>
+                                <option value="Wexford">Wexford</option>
+                            </select><br><br>
         
                         <label>Date Range</label><br>
                             <div class="subGroup">

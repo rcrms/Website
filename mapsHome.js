@@ -97,6 +97,9 @@ function changeOpacity() {
 
 //endregion
 
+var activeLocations = [];//info of each marker for display in a table below map area
+var activeLocationsIDs = [];//keys of each complaint to prevent duplicates
+
 //use this to create the button in the infowindow which passes its ID to its onClick function
 function htmlToElement(html) {
     var template = document.createElement('template');
@@ -119,117 +122,135 @@ function handleMarkerDelete(complaintID){
     } else {
         console.log("you did not want to delete " + complaintID);
     }
-
 }
 
 //firebase stuff
 //region
 
   // Initialize Firebase
-  
-var DBref = firebase.database().ref('mapsPageTest');
+function updateMap(){
+    var formData = getFormData();
+    console.log(formData);
 
-// var div = document.getElementById('form');
-
-DBref.on('value', 
-  //this func takes 3 arguements
-    //event
-    //event handler
-    //error handler
-    function gotData(data)
-    {
-        //clear any previous data held by the maps
-        heatmap.getData().clear();
-        markerClusterer.clearMarkers();
+    if(formData.county && formData.dataType && formData.fromDate && formData.toDate){
+        //call getMapData cloud function
+            //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+        //parse http request response
+            //https://www.kirupa.com/html5/making_http_requests_js.htm
         
-        var allObj = data.val();//gets JSON obj of all data at the level provided by ref()
-        var keys = Object.keys(allObj);//gets all keys for the same level
+        //everything below this comment is the old way, use http request
         
-        for(i = 0; i < keys.length; i++)
-        {//set up marker for each complaint in database
-            var key = keys[i];//gets current key - submissionID
-            var lat = allObj[key].lat;//gets current obj lat
-            var lng = allObj[key].lng;//gets current obj lng
+        //retrieve data based on parameters
+        var DBref = firebase.database().ref('mapsPageTest');
 
-            var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
-            heatmap.getData().push(point);
+        // var div = document.getElementById('form');
 
-            var marker = new google.maps.Marker({'position': point, 'title': key});
+        DBref.on('value', 
+        //this func takes 3 arguements
+            //event
+            //event handler
+            //error handler
+            function gotData(data)
+            {
+                //clear any previous data held by the maps
+                heatmap.getData().clear();
+                markerClusterer.clearMarkers();
+                // console.clear();
+                
+                var allObj = data.val();//gets JSON obj of all data at the level provided by ref()
+                var keys = Object.keys(allObj);//gets all keys for the same level
+                
+                for(i = 0; i < keys.length; i++)
+                {//set up marker for each complaint in database
+                    // console.log('iteration', i, 'of for-loop')
+                    var key = keys[i];//gets current key - submissionID
+                    var lat = allObj[key].lat;//gets current obj lat
+                    var lng = allObj[key].lng;//gets current obj lng
 
-            marker.addListener('click', function(arg) {
+                    var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
+                    heatmap.getData().push(point);//add point to heatmap
 
-                if(lastInfoWindow){ //close the previously open infowindow
-                    lastInfoWindow.close();
-                }
-                // console.log('markerListener arg', arg)
-                var myPos = { //hold clicked marker location
-                    lat: Number(parseFloat(this.getPosition().lat() ).toFixed(6) ), 
-                    lng: Number(parseFloat(this.getPosition().lng() ).toFixed(6) )
-                };
-
-                var markerTitle = this.getTitle();
-                //button inside infowindow
-                var buttonHTML = '<input type="button" value="Delete"' +
-                    ' onclick="handleMarkerDelete(\'' + markerTitle + '\')">';
-                var infowindowButton = htmlToElement(buttonHTML);
-                //the rest of the content of infowindow
-                var content = "My lat: " + myPos.lat + "<br>" + 
-                              "My lng: " + myPos.lng + "<br>" +
-                              "Me: " + markerTitle + "<br><br>" + 
-                              infowindowButton.outerHTML;   
-
-                //center map on marker
-                markerMap.panTo(myPos);
-                // console.log('myPos', myPos);
-
-                //start reverse geocoding
-                var geocoder = new google.maps.Geocoder;
-                var markerAddress = {};
-                geocoder.geocode({'location': myPos}, function(results, status) {
-                    if (status === 'OK') {
-                      if (results[0]) {
-                          //grabs markers reverse geocoded address
-                        markerAddress.number = results[0].address_components[0].short_name;
-                        markerAddress.street = results[0].address_components[1].short_name;
-                        markerAddress.town   = results[0].address_components[2].short_name;
-
-                        console.log('markerAddress', markerAddress);
-
-                        content += " <br><br>" + markerAddress.number + "<br>" +
-                                    markerAddress.street + "<br>" + markerAddress
+                    var marker = new google.maps.Marker({'position': point});
+                    marker.complaintKey = key;
+                    marker.addListener('click', function() {
                         
-                      } else {
-                        window.alert('No results found');
-                      }
-                    } else {
-                      window.alert('Geocoder failed due to: ' + status);
-                    }
-                  });//end of geocoder.geocode()  
-                  
-                  
-                //actual infowindow obj
-                var infowindow = new google.maps.InfoWindow({
-                    content: content
-                });
-                infowindow.open(markerMap, this);
-                //save newly created infowindow to be closed upon another marker's click
-                lastInfoWindow = infowindow;
+                        if(lastInfoWindow){ //close the previously open infowindow
+                            lastInfoWindow.close();
+                        }
+                        var myPos = { //hold clicked marker location
+                            lat: Number(parseFloat(this.getPosition().lat() ).toFixed(6) ), 
+                            lng: Number(parseFloat(this.getPosition().lng() ).toFixed(6) )
+                        };
 
-                  console.log('markerAddress after geocoder', markerAddress);             
-            });//end of marker click listener
+                        //center map on marker
+                        markerMap.panTo(myPos);
+                        var myMarker = this;
 
-            //add newly created marker to its map
-            markerClusterer.addMarker(marker);
-        }
-        // console.log('heatmap data', heatmap.getData());
-        // console.log('markerMap data', markerClusterer.getMarkers());
-        // console.log('markerClusterer grid size:', markerClusterer.getGridSize());
+                        //start reverse geocoding
+                        var geocoder = new google.maps.Geocoder;
+                        geocoder.geocode({'location': myPos}, function(results, status) {
+                            if (status === 'OK') {
+                                if (results[0]) {
+                                    //grabs markers reverse geocoded address
+                                    number = results[0].address_components[0].short_name;
+                                    street = results[0].address_components[1].short_name;
+                                    town   = results[0].address_components[2].short_name;
 
-        //end of gotData() for firebase database connection
-    },
-    function gotError(e){
-        console.log("Error", e);
-    });
+                                    var complaintKey = myMarker.complaintKey;
+                                    //button inside infowindow
+                                    var buttonHTML = '<input type="button" value="Delete"' +
+                                        ' onclick="handleMarkerDelete(\'' + complaintKey + '\')">';
+                                    var infowindowButton = htmlToElement(buttonHTML);
+                                    //the rest of the content of infowindow
+                                    var content = "My lat: " + myPos.lat + "<br>" + 
+                                                "My loooong: " + myPos.lng + "<br>" +
+                                                "Key: " + complaintKey + "<br><br>" + 
+                                                number + " " + street + ", " +
+                                                town + "<br><br>" +
+                                                infowindowButton.outerHTML;  
+                                    
+                                    //actual infowindow obj
+                                    var infowindow = new google.maps.InfoWindow({
+                                        content: content
+                                    });
+                                    infowindow.open(markerMap, myMarker);
+                                    //save newly created infowindow to be closed upon another marker's click
+                                    lastInfoWindow = infowindow;
+
+                                    if(!activeLocationsIDs.includes(complaintKey)){
+                                        //maintains an array of all recently clicked markers
+                                        console.log('new active marker added', complaintKey);
+                                        activeLocationsIDs.push(complaintKey);
+                                        activeLocations.push({
+                                            number: number,
+                                            street: street,
+                                            town: town,
+                                            id: complaintKey
+                                        });
+                                    }
+                                    
+                                } else {
+                                    console.log('No geocoder results found.');
+                                }
+                            } else {
+                            console.log('Geocoder failed due to: ' + status);
+                            }
+                        });//end of geocoder.geocode() 
+            
+                    });//end of marker click listener
+
+                    //add newly created marker to its map
+                    markerClusterer.addMarker(marker);
+
+                }//end of for-loop
+
+            },//end of gotData() for firebase database connection
+            function gotError(e){
+                console.log("Error", e);
+            }
+        );//end of DBref.on('value')
+    }
+}
 
 //endregion
 
@@ -273,54 +294,86 @@ function slideToggle() {
     //get child div w/ class of slider
     var slider = document.getElementById("mapTypeSlider");
     //toggle slid class to change desired properties
-    slider.classList.toggle("slid"); 
+    slider.classList.toggle("slid");
+
+    var button = document.getElementById('toggleHeatmapButton');
+    
+    if(button.disabled){
+        button.disabled = false;
+    } else {
+        button.disabled = true;
+    }
     toggleMaps(); 
 }
 
-function updateMap(){
-//currently this func only logs results of the customize panel, but the end goal
-//of this func is to alter the contents of the maps
-    //array of all checkboxes in DOM
-    var cbs = document.querySelectorAll("input[type='checkbox']");
-    //values of all checkBoxes in DOM
-    var checkBoxValues = {};
+function getFormData(){
 
-    for(var i = 0; i < cbs.length; i++){
-        //true/false value of checkbox
-        var currVal = cbs[i].checked;
-        //unique ID of checkbox
-        var currID = cbs[i].id;
-        //store value associated with appropriate DOM ID
-        checkBoxValues[currID] = currVal;
+    var datePicker1 = document.getElementById('fromDate');
+    var datePicker2 = document.getElementById('toDate');
+    var dataTypeLabel = document.getElementById('dataTypeLabel');
+    var countyLabel = document.getElementById('countyLabel');
+
+    //reset all error indications
+    datePicker1.classList.remove('missingInfo');
+    datePicker2.classList.remove('missingInfo');
+    dataTypeLabel.classList.remove('missingInfo');
+    countyLabel.classList.remove('missingInfo');
+
+    var dataType;
+    //get data type from radio buttons
+    if(document.getElementById('dataTypeResolved').checked){
+        dataType = "resolved";
+    } else if(document.getElementById('dataTypeUnresolved').checked){
+        dataType = "unresolved";
+    } else if(document.getElementById('dataTypeAll').checked){
+        dataType = "all";
     }
-    console.log(checkBoxValues);
 
-    //get toggles values - if there only ends up being one, simplify this code
-    //all toggles
-    var toggles = document.getElementsByClassName("toggle");
-    var toggleValues = {};
+    //get form data
+    var dropDown = document.getElementById('countySelect');
+    var county = dropDown.options[dropDown.selectedIndex].text;
+    var fromDate = datePicker1.value;//get date string
+    var toDate = datePicker2.value;//get date string
 
-    for(var i = 0; i < toggles.length; i++){
-        //get current toggle's slider child
-        currSlider = toggles[i].childNodes[1];
-        currToggleID = toggles[i].id;
-
-        if(currSlider.classList.contains("slid")){
-            //current toggle is ON
-            toggleValues[currToggleID] = true;
-        }else{
-            //current toggle is OFF
-            toggleValues[currToggleID] = false;            
-        }
+    //check for errors for current submit
+    if(!dataType){//data type group of radio buttons
+        dataTypeLabel.classList.add('missingInfo');
     }
-    console.log(toggleValues);
+    if(!county){//county drop down menu
+        countyLabel.classList.add('missingInfo');
+    }
+        //dates must be between the years 2000 and 2199 inclusive
+        //must match YYYY-MM-DD or YYYY/MM/DD
+    var dateRegex = /^2[0|1]\d{2}[\/\-](0[1-9]|1[012])[\/\-](0[1-9]|[12][0-9]|3[01])$/
 
-    var fromDate = document.getElementById('fromDate');
-    var toDate = document.getElementById('toDate');
-    //dateObj.value returns a string in the format "YYYY-MM-DD"
-    //to assign value of a data picker -? dateObj.value = "2014-08-12";
-    console.log(fromDate.value, toDate.value);
+    if(!dateRegex.test(fromDate)){
+        datePicker1.classList.add('missingInfo');
+        fromDate = null;
+    } else {
+        fromDate = fromDate.split('-');//make array
+        var tempDate = fromDate[0];//hold year
+        fromDate.shift();//remove year from fromDate[0]
+        fromDate.push(tempDate);//put year at end
+        fromDate = fromDate.join('/');//bring back to string
+    }
+    if(!dateRegex.test(toDate)){
+        datePicker2.classList.add('missingInfo');
+        toDate = null;
+    } else {
+        toDate = toDate.split('-');//make array
+        var tempDate = toDate[0];//hold year
+        toDate.shift();//remove year from fromDate[0]
+        toDate.push(tempDate);//put year at end
+        toDate = toDate.join('/');//bring back to string
+    }
+    //dates are now in format of 'MM/DD/YYYY' to match format on firebase
 
+    return {
+        dataType: dataType,
+        county: county,
+        fromDate: fromDate,
+        toDate: toDate
+    }
 }
 //endregion
 
