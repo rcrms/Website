@@ -12,8 +12,9 @@
     padding-top: 5px;
     width:100%;
 }
-#fromDate, #toDate{
-    float:right;
+#fromDate, #toDate, #countySelect{
+    width: 125px;
+    float: right;
 }
 #customizePanel{
     min-width: 235px;
@@ -40,6 +41,9 @@
 }
 #formLeft{
     width: 70%;
+}
+#formRight{
+    margin-left: 20px;
 }
 .missingInfo{
     color: red;
