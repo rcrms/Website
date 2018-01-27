@@ -5,21 +5,54 @@
     margin-bottom: 10px;
 }
 #canvasHolder{
-    width: 85%;
-    max-width: 650px;
+
 }
 #buttonHolder{
     display: flex;
-    flex-direction: column;
-    margin-left: auto;
-    margin-right: auto;
+    flex-direction: row;
+    border-radius: 0.2rem;
 }
 .chartButton{
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 5px;
+    margin-right: 5px;
     margin-top: 10px;
     width: 100%;
 }
 .chartButton:hover{
     cursor: pointer;
+}
+#customizePanel{
+    margin-left: auto;
+    margin-right: auto;
+    padding-right: 15px;
+    min-width: 220px;
+}
+fieldset{
+    border-radius: 0.5rem;
+}
+#chartDiv{
+    display: flex;
+    flex-direction: column;
+    width: 85%;
+    max-width: 650px;
+    min-width: 500px;
+}
+.subItem{
+    margin-left: 20px;
+}
+.subGroup{
+    padding-top: 5px;
+    width:100%;
+}
+#fromDate, #toDate, #countySelect{
+    width: 125px;
+    float: right;
+}
+#chartSubmitBtn{
+    width: 200px;
+    margin: auto;
+    cursor: pointer;
+}
+.missingInfo{
+    color: red;
 }

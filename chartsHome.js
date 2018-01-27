@@ -34,20 +34,24 @@ rgb(255, 255, 0) - yellow
 rgb(0, 255, 255) - aqua
 */
 var ctx = document.getElementById('myChart').getContext('2d');
-var type = 'line', options = {};
+var type = 'line';
+var options = {};
 var data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: [],
+    // labels: ["January", "February", "March", "April", "May", "June", "July"],
     datasets: [{
         label: "My First dataset",
         backgroundColor: colors[0],
         borderColor: outlines[0],
-        data: [6, 26, 31, 4, 67, 41, 66]
+        data: []
+        // data: [6, 26, 31, 4, 67, 41, 66]
     },
     {
         label: "My Second dataset",
         backgroundColor: colors[1],
         borderColor: outlines[1],
-        data: [45, 12, 30, 55, 9, 61, 26]
+        data: []
+        // data: [45, 12, 30, 55, 9, 61, 26]
     }]
 }
 //give default chart type
@@ -73,11 +77,6 @@ function makeRadarChart(){
     type = 'radar';
     chart = new Chart(ctx, {type: type, data: data, options: options});
 }
-function makeDoughnutChart(){
-    chart.destroy();
-    type = 'doughnut';
-    chart = new Chart(ctx, {type: type, data: data, options: options});
-}
 function makePolarAreaChart(){
     chart.destroy();
     type = 'polarArea';
@@ -90,4 +89,99 @@ function saveIt(){
     a.setAttribute('href', chart.toBase64Image());
     a.setAttribute('download', 'newChart.png');
     a.click();
+}
+function submitForm(){
+    
+    var formData = getFormData();
+
+    console.log(formData);
+
+    if(formData.county && formData.dataType && formData.fromDate && formData.groupBy && formData.toDate){//ready to query firebase
+        //call getChartData cloud function
+            //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+        //parse http request response
+            //https://www.kirupa.com/html5/making_http_requests_js.htm
+    }
+}
+function getFormData(){
+
+    var datePicker1 = document.getElementById('fromDate');
+    var datePicker2 = document.getElementById('toDate');
+    var dataTypeLabel = document.getElementById('dataTypeLabel');
+    var groupByLabel = document.getElementById('groupByLabel');
+    var countyLabel = document.getElementById('countyLabel');
+
+    //reset all error indications
+    datePicker1.classList.remove('missingInfo');
+    datePicker2.classList.remove('missingInfo');
+    dataTypeLabel.classList.remove('missingInfo');
+    groupByLabel.classList.remove('missingInfo');
+    countyLabel.classList.remove('missingInfo');
+
+    var dataType, groupBy;
+    //get data type from radio buttons
+    if(document.getElementById('dataTypeResolved').checked){
+        dataType = "resolved";
+    } else if(document.getElementById('dataTypeUnresolved').checked){
+        dataType = "unresolved";
+    } else if(document.getElementById('dataTypeAll').checked){
+        dataType = "all";
+    }
+    //get group by data from radio buttons
+    if(document.getElementById('groupByDay').checked){
+        groupBy = "day";
+    } else if(document.getElementById('groupByWeek').checked){
+        groupBy = "week";
+    } else if(document.getElementById('groupByMonth').checked){
+        groupBy = "month";
+    }
+    //get form data
+    var dropDown = document.getElementById('countySelect');
+    var county = dropDown.options[dropDown.selectedIndex].text;
+    var fromDate = datePicker1.value;//get date string
+    var toDate = datePicker2.value;//get date string
+
+    //check for errors for current submit
+    if(!dataType){//data type group of radio buttons
+        dataTypeLabel.classList.add('missingInfo');
+    }
+    if(!groupBy){//group by group of radio buttons
+        groupByLabel.classList.add('missingInfo');
+    }
+    if(!county){//county drop down menu
+        countyLabel.classList.add('missingInfo');
+    }
+        //dates must be between the years 2000 and 2199 inclusivee
+        //must match YYYY-MM-DD or YYYY/MM/DD
+    var dateRegex = /^2[0|1]\d{2}[\/\-](0[1-9]|1[012])[\/\-](0[1-9]|[12][0-9]|3[01])$/
+
+    if(!dateRegex.test(fromDate)){
+        datePicker1.classList.add('missingInfo');
+        fromDate = null;
+    } else {
+        fromDate = fromDate.split('-');//make array
+        var tempDate = fromDate[0];//hold year
+        fromDate.shift();//remove year from fromDate[0]
+        fromDate.push(tempDate);//put year at end
+        fromDate = fromDate.join('/');//bring back to string
+    }
+    if(!dateRegex.test(toDate)){
+        datePicker2.classList.add('missingInfo');
+        toDate = null;
+    } else {
+        toDate = toDate.split('-');//make array
+        var tempDate = toDate[0];//hold year
+        toDate.shift();//remove year from fromDate[0]
+        toDate.push(tempDate);//put year at end
+        toDate = toDate.join('/');//bring back to string
+    }
+    //dates are now in format of 'MM/DD/YYYY' to match format on firebase
+
+    return {
+        dataType: dataType,
+        groupBy: groupBy,
+        county: county,
+        fromDate: fromDate,
+        toDate: toDate
+    }
 }

@@ -3,24 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Charts Home</title>
-    <script>
-        //get firebase dependencies ready
-        function handleLoad(e) 
-        {
-          console.log('Loaded import: ' + e.target.href);
-        }
-        function handleError(e) 
-        {
-          console.log('Error loading import: ' + e.target.href);
-        }
-      </script>
-
-      <!-- onload and onerror are only for testing, not necessary for production -->
-    <link rel="import" href="firebaseSources.html" onload="handleLoad(event)" onerror="handleError(event)">
-
-    <!-- provide getSources.js a location to add firebase dependencies -->
-    <div id="scriptTarget"></div>
-    <script src="getSources.js"></script>
+    <link rel="icon" href="images/charts-favicon.ico">
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
     <script src="authUser.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
 
@@ -60,19 +47,148 @@
         <br> <hr> <br>
 
         <div id="bottom">
-            <div id="canvasHolder">
-                <canvas id="myChart"></canvas>
+            <div id="chartDiv">
+                <div id="canvasHolder">
+                        <canvas id="myChart"></canvas>
+                </div>
+
+                <div id="buttonHolder">
+                        <button class="chartButton" onclick="saveIt()">Save</button>
+                        <button class="chartButton" onclick="makePieChart()">Pie</button>
+                        <button class="chartButton" onclick="makeLineChart()">Line</button>
+                        <button class="chartButton" onclick="makeBarChart()">Bar</button>
+                        <button class="chartButton" onclick="makeRadarChart()">Radar</button>
+                        <button class="chartButton" onclick="makePolarAreaChart()">Polar Area</button>
+                </div>
             </div>
             
-            <div id="buttonHolder">
-                    <button class="chartButton" onclick="saveIt()">Save</button>
-                    <button class="chartButton" onclick="makePieChart()">Pie</button>
-                    <button class="chartButton" onclick="makeLineChart()">Line</button>
-                    <button class="chartButton" onclick="makeBarChart()">Bar</button>
-                    <button class="chartButton" onclick="makeRadarChart()">Radar</button>
-                    <button class="chartButton" onclick="makeDoughnutChart()">Doughnut</button>
-                    <button class="chartButton" onclick="makePolarAreaChart()">Polar Area</button>
-            </div>
+            <form id="customizePanel" onsubmit="return false">
+                <fieldset>
+                    <legend>Customize</legend>
+                    <label id="dataTypeLabel">Data Type:</label><br>
+                        <input class="subItem" type="radio" name="dataType" id="dataTypeAll" checked="checked">
+                        <label for="dataTypeAll">All</label><br>
+                        
+                        <input class="subItem" type="radio" name="dataType" id="dataTypeResolved">
+                        <label for="dataTypeResolved">Resolved</label><br>
+        
+                        <input class="subItem" type="radio" name="dataType" id="dataTypeUnresolved">
+                        <label for="dataTypeUnresolved">Unresolved</label><br><br>
+
+
+                    <label id="groupByLabel">Group By:</label><br>
+                        <input class="subItem" type="radio" name="groupBy" id="groupByDay" checked="checked">
+                        <label for="groupByDay">Day</label><br>
+            
+                        <input class="subItem" type="radio" name="groupBy" id="groupByWeek">
+                        <label for="groupByWeek">Week</label><br>
+            
+                        <input class="subItem" type="radio" name="groupBy" id="groupByMonth">
+                        <label for="groupByMonth">Month</label><br><br>
+
+
+                    <label id="countyLabel">County:</label>
+                        <select name="countySelect" id="countySelect" >
+                            <option value="All">All</option>
+                            <option value="Alcona">Alcona</option>
+                            <option value="Alger">Alger</option>
+                            <option value="Allegan">Allegan</option>
+                            <option value="Alpena">Alpena</option>
+                            <option value="Antrim">Antrim</option>
+                            <option value="Arenac">Arenac</option>
+                            <option value="Baraga">Baraga</option>
+                            <option value="Barry">Barry</option>
+                            <option value="Bay">Bay</option>
+                            <option value="Benzie">Benzie</option>
+                            <option value="Berrien">Berrien</option>
+                            <option value="Branch">Branch</option>
+                            <option value="Calhoun">Calhoun</option>
+                            <option value="Cass">Cass</option>
+                            <option value="Charlevoix">Charlevoix</option>
+                            <option value="Cheboygan">Cheboygan</option>
+                            <option value="Chippewa">Chippewa</option>
+                            <option value="Clare">Clare</option>
+                            <option value="Clinton">Clinton</option>
+                            <option value="Crawford">Crawford</option>
+                            <option value="Delta">Delta</option>
+                            <option value="Dickinson">Dickinson</option>
+                            <option value="Eaton">Eaton</option>
+                            <option value="Emmet">Emmet</option>
+                            <option value="Genesee">Genesee</option>
+                            <option value="Gladwin">Gladwin</option>
+                            <option value="Gogebic">Gogebic</option>
+                            <option value="Grand Traverse">Grand Traverse</option>
+                            <option value="Gratiot">Gratiot</option>
+                            <option value="Hillsdale">Hillsdale</option>
+                            <option value="Houghton">Houghton</option>
+                            <option value="Huron">Huron</option>
+                            <option value="Ingham">Ingham</option>
+                            <option value="Ionia">Ionia</option>
+                            <option value="Iosco">Iosco</option>
+                            <option value="Iron">Iron</option>
+                            <option value="Isabella">Isabella</option>
+                            <option value="Jackson">Jackson</option>
+                            <option value="Kalamazoo">Kalamazoo</option>
+                            <option value="Kalkaska">Kalkaska</option>
+                            <option value="Kent">Kent</option>
+                            <option value="Keweenaw">Keweenaw</option>
+                            <option value="Lake">Lake</option>
+                            <option value="Lapeer">Lapeer</option>
+                            <option value="Leelanau">Leelanau</option>
+                            <option value="Lenawee">Lenawee</option>
+                            <option value="Livingston">Livingston</option>
+                            <option value="Luce">Luce</option>
+                            <option value="Mackinac">Mackinac</option>
+                            <option value="Macomb">Macomb</option>
+                            <option value="Manistee">Manistee</option>
+                            <option value="Marquette">Marquette</option>
+                            <option value="Mason">Mason</option>
+                            <option value="Mecosta">Mecosta</option>
+                            <option value="Menominee">Menominee</option>
+                            <option value="Midland">Midland</option>
+                            <option value="Missaukee">Missaukee</option>
+                            <option value="Monroe">Monroe</option>
+                            <option value="Montcalm">Montcalm</option>
+                            <option value="Montmorency">Montmorency</option>
+                            <option value="Muskegon">Muskegon</option>
+                            <option value="Newaygo">Newaygo</option>
+                            <option value="Oakland">Oakland</option>
+                            <option value="Oceana">Oceana</option>
+                            <option value="Ogemaw">Ogemaw</option>
+                            <option value="Ontonagon">Ontonagon</option>
+                            <option value="Osceola">Osceola</option>
+                            <option value="Oscoda">Oscoda</option>
+                            <option value="Otsego">Otsego</option>
+                            <option value="Ottawa">Ottawa</option>
+                            <option value="Presque Isle">Presque Isle</option>
+                            <option value="Roscommon">Roscommon</option>
+                            <option value="Saginaw">Saginaw</option>
+                            <option value="St. Clair">St. Clair</option>
+                            <option value="St. Joseph">St. Joseph</option>
+                            <option value="Sanilac">Sanilac</option>
+                            <option value="Schoolcraft">Schoolcraft</option>
+                            <option value="Shiawassee">Shiawassee</option>
+                            <option value="Tuscola">Tuscola</option>
+                            <option value="Van Buren">Van Buren</option>
+                            <option value="Washtenaw">Washtenaw</option>
+                            <option value="Wayne">Wayne</option>
+                            <option value="Wexford">Wexford</option>
+                        </select><br><br>
+                    
+                    <label>Date Range:</label><br>
+                        <div class="subGroup">
+                            <label id="fromDateLabel" for="fromDate" class="subItem">From: </label>
+                            <input type="date" name="fromDate" id="fromDate"><br>
+                        </div>
+                        <div class="subGroup">
+                            <label id="toDateLabel" for="toDate" class="subItem">To: </label>
+                            <input type="date" name="toDate" id="toDate"><br>
+                        </div><br>
+    
+                    <button id="chartSubmitBtn" type="submit" onclick="submitForm()">Submit</button>
+
+                </fieldset>
+            </form>
 
         </div>
 
