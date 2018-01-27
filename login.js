@@ -16,19 +16,34 @@ function logInPressed(){
     var email = document.getElementById('txtEmail').value;
     var pass = document.getElementById('txtPass').value;
     //authentication obj
-    const auth = firebase.auth();
-    //authentication attempt
-    auth.signInWithEmailAndPassword(email, pass).then(authChanged).catch(authError);
+    firebase.auth().signInWithEmailAndPassword(email, pass).then(authChanged).catch(authError);
     
     function authError(error)
-    {
-        //console.log(error.message);
-        window.location = "failure.html";
+    {//attempted to sign in, failed
+        // console.log(error.message);
+        // window.location = "failure.html";
+        if(e = document.getElementById('error')){
+            e.parentNode.removeChild(e);
+        }
+        console.log("authError(error)", error.code);
+        if(error.code == "auth/wrong-password"){
+            var msg = document.createElement('p');
+            msg.id = 'error';
+            msg.innerHTML = 'Incorrect password.';
+            msg.style.color = "red";
+            document.body.appendChild(msg);
+        }
+        if(error.code == "auth/user-not-found" || error.code == "auth/invalid-email"){
+            var msg = document.createElement('p');
+            msg.id = 'error';
+            msg.innerHTML = 'Incorrect email.';
+            msg.style.color = "red";
+            document.body.appendChild(msg);
+        }
     }
     function authChanged(user){
         if(user)
         {//user signed in
-            //console.log("signed in!", user);
             window.location = "landingPage.html";
         }
         else

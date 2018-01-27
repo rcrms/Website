@@ -7,7 +7,7 @@ a:link{
 }
 #content{
     width: 80%;
-    min-width: 485px;
+    min-width: 750px;
     /*max-width: 660px;*/
     margin: auto;
     padding: 5px;
@@ -21,13 +21,15 @@ a:link{
 .card {
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
     transition: 0.3s;
-    width: 20%;
+    max-width: 20%;
+    min-width: 150px;
     margin-left: auto;
     margin-right: auto;
     margin-top: 30px;
     margin-bottom: 10px;
     border-radius: 0.5rem;
     background: #FFF;
+    /* padding-left: 10px; */
 }
 .card:hover {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
@@ -38,7 +40,7 @@ a:link{
 .card > a > p{
     margin-top: auto;
     margin-bottom: auto;
-    padding-left: 5px;
+    padding-left: 25px;
     width: 45px;
 }
 img{
