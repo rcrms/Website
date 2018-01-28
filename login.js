@@ -22,23 +22,21 @@ function logInPressed(){
     {//attempted to sign in, failed
         // console.log(error.message);
         // window.location = "failure.html";
-        if(e = document.getElementById('error')){
+        if(e = document.getElementById('error')){//if there exists an error message, remove it
             e.parentNode.removeChild(e);
         }
         console.log("authError(error)", error.code);
-        if(error.code == "auth/wrong-password"){
+        if(error.code == "auth/user-not-found" || 
+            error.code == "auth/invalid-email" || 
+            error.code == "auth/wrong-password"){
             var msg = document.createElement('p');
             msg.id = 'error';
-            msg.innerHTML = 'Incorrect password.';
+            msg.innerHTML = 'Invalid Credentials';
             msg.style.color = "red";
-            document.body.appendChild(msg);
-        }
-        if(error.code == "auth/user-not-found" || error.code == "auth/invalid-email"){
-            var msg = document.createElement('p');
-            msg.id = 'error';
-            msg.innerHTML = 'Incorrect email.';
-            msg.style.color = "red";
-            document.body.appendChild(msg);
+            msg.style.marginRight = "auto";
+            msg.style.marginLeft = "auto";
+            msg.style.marginBottom = "0px";
+            document.getElementById('loginDiv').appendChild(msg);
         }
     }
     function authChanged(user){

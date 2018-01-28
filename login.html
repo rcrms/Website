@@ -9,17 +9,24 @@
     <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
     <script src="login.js"></script>
+    <link rel="stylesheet" href="landingPage.css">
+    <link rel="stylesheet" href="login.css">
 </head>
 
 <body>
-    <div id="main-content">
-        <form onsubmit="return false">
-            <input type="email" id="txtEmail" placeholder="Email">
-            <br><br>
-            <input type="password" id="txtPass" placeholder="Password">
-            <br><br>
-            <button id="btnLogIn" type="submit" onclick="logInPressed()">Log In</button>
-        </form>
+    <div id="content">
+        <div id="header">
+            <script src="header.js"></script>
+        </div>
+        <div id="loginDiv">
+            <form onsubmit="return false">
+                <input type="email" id="txtEmail" maxlength="100" placeholder="Email">
+                <br><br>
+                <input type="password" id="txtPass" maxlength="100" placeholder="Password">
+                <br><br>
+                <button type="submit" id="btnLogIn" onclick="logInPressed()">Log In</button>
+            </form>
+        </div>
     </div>
 
 

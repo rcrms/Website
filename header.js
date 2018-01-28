@@ -19,8 +19,11 @@ switch(page)
     case "reportsHome":
         title.innerText = "Reports";
         break;
+    case "login":
+        title.innerText = "Log In";
+        break;
     default:
-        console.log("Error: Reached unknown page");
+        console.log("Error: Reached unknown page.");
 }
 //title styles
 title.style.color = "white";
@@ -68,6 +71,7 @@ logout.style.marginBottom = "auto";
 var button2 = document.createElement('a');
 button2.style.marginTop = "auto";
 button2.style.marginBottom = "auto";
+button2.style.cursor = "pointer";
 button2.addEventListener('click', signMeOut , false);
 //<a> <img> </a>
 button2.appendChild(logout);
