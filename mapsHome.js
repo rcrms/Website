@@ -135,6 +135,78 @@ function updateMap(){
     if(formData.county && formData.dataType && formData.fromDate && formData.toDate){
         //call getMapData cloud function
             //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+            var cloudFuncURL = "https://us-central1-firsttest-e58df.cloudfunctions.net/getMapData";
+            var params = "?county=" + formData.county + 
+                         "&dataType=" + formData.dataType +
+                         "&fromDate=" + formData.fromDate +
+                         "&toDate=" + formData.toDate +
+                         "&key=" + cloudFuncKey;
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log("server response", xhttp.responseText);
+                    console.log("server response", JSON.parse(xhttp.responseText) );
+                    var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
+                    //all the code in the DB listener should be put here
+                    //to create all markers once the server responds with the data
+                    
+                    //example of how to parse response from server
+                    //region
+                    //the following block iterates over an object whose keys are objects themselves
+                    //'obj' is what the server will need to return from the http request
+
+                    obj = {
+                        "key1":{
+                            "age": 14,
+                            "name": "Tom"
+                        },
+                        "key2":{
+                            "age": 22,
+                            "name": "Josh"
+                        },
+                        "key3":{
+                            "age": 44,
+                            "name": "Tyler"
+                        }
+                    }
+
+                    for (var key in obj) {      //'key' is the key of each object in 'obj'
+                        if (obj.hasOwnProperty(key)) {  //'key' is a real property of 'obj'
+                            console.log(key);
+                            for(var i in obj[key]){     //iterate over object pointed to by 'key' -> 'i' is a key
+                                console.log("\t" + i + " -> " +obj[key][i]);    //obj[key][i] is a value
+                            }
+                        }
+                    }
+                    /*
+                        OUTPUT:
+                            key1
+                                name -> Tom
+                                age -> 14
+                            key2
+                                name -> Josh
+                                age -> 22
+                            key3
+                                name -> Tyler
+                                age - >44
+
+                    */
+
+                    //endregion
+
+                }
+            };
+            xhttp.onerror = function(XMLHttpRequest, textStatus, errorThrown) {
+                console.log( 'The data failed to load :(' );
+                console.log(JSON.stringify(XMLHttpRequest));
+                console.log("textStatus", textStatus);
+                console.log("errorThrown", errorThrown);
+              };
+            var request = cloudFuncURL + params;
+            xhttp.open("GET", request, true);
+            xhttp.send();
+            console.log("http req url\n", request);
         //parse http request response
             //https://www.kirupa.com/html5/making_http_requests_js.htm
         
