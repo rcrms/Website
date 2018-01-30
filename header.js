@@ -5,6 +5,7 @@ var arr = url.split("/");
 var page = (arr[arr.length - 1]).split(".")[0];
 //console.log(page);
 var title = document.createElement('h3');
+
 switch(page)
 {//using url, decide text of title
     case "landingPage":
@@ -26,8 +27,15 @@ switch(page)
         console.log("Error: Reached unknown page.");
 }
 //title styles
-title.style.color = "white";
+title.style.color = "#FFC61E";
 title.style.margin = "auto";
+var titleDiv = document.createElement('div');
+titleDiv.appendChild(title);
+titleDiv.style.background = "#003F87";
+titleDiv.classList.add('rounded');
+titleDiv.classList.add('headerTitle');
+
+
 //home button
 var home = document.createElement('img');
 home.setAttribute('src', 'images/home.png');
@@ -40,6 +48,8 @@ home.style.marginBottom = "auto";
 var button1 = document.createElement('a');
 button1.style.marginTop = "auto";
 button1.style.marginBottom = "auto";
+button1.style.background = "#FFC61E";
+button1.classList.add('rounded');
 button1.setAttribute('href', 'landingPage.html');
 //<a> <img> </a>
 button1.appendChild(home);
@@ -71,7 +81,9 @@ logout.style.marginBottom = "auto";
 var button2 = document.createElement('a');
 button2.style.marginTop = "auto";
 button2.style.marginBottom = "auto";
+button2.style.background = "#FFC61E";
 button2.style.cursor = "pointer";
+button2.classList.add('rounded');
 button2.addEventListener('click', signMeOut , false);
 //<a> <img> </a>
 button2.appendChild(logout);
@@ -81,13 +93,12 @@ button2.appendChild(logout);
 var header = document.createElement('div');
 header.style.width = window.outerWidth;
 header.style.height = 35 + 'px';
-header.style.background = '#0040FF';
 header.style.display = 'flex';
-header.style.borderRadius = 0.25 + 'em';
+// header.style.borderRadius = 0.25 + 'em';
 
 //assemble and place header
 header.appendChild(button1);
-header.appendChild(title);
+header.appendChild(titleDiv);
 header.appendChild(button2);
 var placement = document.getElementById('header');
 placement.appendChild(header);
