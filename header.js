@@ -27,11 +27,11 @@ switch(page)
         console.log("Error: Reached unknown page.");
 }
 //title styles
-title.style.color = "#FFC61E";
+title.style.color = "#FFC61E";//LSSU secondary color
 title.style.margin = "auto";
 var titleDiv = document.createElement('div');
 titleDiv.appendChild(title);
-titleDiv.style.background = "#003F87";
+titleDiv.style.background = "#003F87";//LSSU primary color
 titleDiv.classList.add('rounded');
 titleDiv.classList.add('headerTitle');
 
@@ -48,7 +48,7 @@ home.style.marginBottom = "auto";
 var button1 = document.createElement('a');
 button1.style.marginTop = "auto";
 button1.style.marginBottom = "auto";
-button1.style.background = "#FFC61E";
+button1.style.background = "#FFC61E";//LSSU secondary color
 button1.classList.add('rounded');
 button1.setAttribute('href', 'landingPage.html');
 //<a> <img> </a>
@@ -81,7 +81,7 @@ logout.style.marginBottom = "auto";
 var button2 = document.createElement('a');
 button2.style.marginTop = "auto";
 button2.style.marginBottom = "auto";
-button2.style.background = "#FFC61E";
+button2.style.background = "#FFC61E";//LSSU secondary color
 button2.style.cursor = "pointer";
 button2.classList.add('rounded');
 button2.addEventListener('click', signMeOut , false);

@@ -20,3 +20,4 @@ firebase.auth().onAuthStateChanged(
         }
     }
 );
+const cloudFuncKey = "FiniteProblems"

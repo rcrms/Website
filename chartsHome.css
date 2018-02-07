@@ -8,6 +8,7 @@
 
 }
 #buttonHolder{
+    margin-top: auto;
     display: flex;
     flex-direction: row;
     border-radius: 0.2rem;

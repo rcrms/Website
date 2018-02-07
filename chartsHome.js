@@ -1,4 +1,3 @@
-//this whole page is all about manipulating the datasets array
 var colors = [
     'rgba(160, 0, 171, 0.5)',
     'rgba(255, 0, 0, 0.5)',
@@ -8,7 +7,10 @@ var colors = [
     'rgba(255, 125, 0, 0.5)',
     'rgba(255, 77, 210, 0.5)',
     'rgba(255, 255, 0, 0.5)',
-    'rgba(0, 255, 255, 0.5)'
+    'rgba(0, 255, 255, 0.5)',
+    'rgba(0, 255, 0, 0.5)',
+    'rgba(0, 179, 0, 0.5)',
+    'rgba(255, 77, 210, 0.5)'
 ]
 var outlines = [
     'rgba(160, 0, 171, 1)',
@@ -19,8 +21,21 @@ var outlines = [
     'rgba(255, 125, 0, 1)',
     'rgba(255, 77, 210, 1)',
     'rgba(255, 255, 0, 1)',
-    'rgba(0, 255, 255, 1)'
+    'rgba(0, 255, 255, 1)',
+    'rgba(0, 255, 0, 1)',
+    'rgba(0, 179, 0, 1)',
+    'rgba(255, 77, 210, 1)'
 ]
+function getColors(){
+    var c = colors.slice(0, data.labels.length);
+    console.log("colors:", c);
+    return c;
+}
+function getOutlines(){
+    var c = outlines.slice(0, data.labels.length);
+    console.log("outlines:", c);
+    return c;
+}
 /*
 colors
 rgb(160, 0, 171) - dark purple
@@ -35,52 +50,115 @@ rgb(0, 255, 255) - aqua
 */
 var ctx = document.getElementById('myChart').getContext('2d');
 var type = 'line';
-var options = {};
+var regOptions = {
+    layout:{
+        padding:{
+            top: 5,
+            right: 5,
+            bottom: 5,
+            left: 5
+        }
+    },
+    scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+    }
+};
+var radarOptions = {
+    layout:{
+        padding:{
+            top: 5,
+            right: 5,
+            bottom: 5,
+            left: 5
+        }
+    }
+};
+var pieOptions = {
+    layout:{
+        padding:{
+            top: 5,
+            right: 5,
+            bottom: 5,
+            left: 5
+        }
+    }
+};
+var data = {};
+/*
 var data = {
-    labels: [],
-    // labels: ["January", "February", "March", "April", "May", "June", "July"],
+    //labels: [],
+    labels: ["January", "February", "March", "April", "May", "June", "July"],
     datasets: [{
-        label: "My First dataset",
+        label: "Unresolved complaints from Chippewa County\n01/01/2018 - 01/30/2018",
         backgroundColor: colors[0],
         borderColor: outlines[0],
-        data: []
-        // data: [6, 26, 31, 4, 67, 41, 66]
-    },
-    {
-        label: "My Second dataset",
-        backgroundColor: colors[1],
-        borderColor: outlines[1],
-        data: []
-        // data: [45, 12, 30, 55, 9, 61, 26]
-    }]
+        //data: []
+        data: [6, 26, 31, 4, 67, 41, 66]
+    }
+    ////////
+    // ,
+    // {
+    //     label: "My Second dataset",
+    //     backgroundColor: colors[1],
+    //     borderColor: outlines[1],
+    //     data: []
+    //     // data: [45, 12, 30, 55, 9, 61, 26]
+    // }
+    ////////
+    ]
 }
+*/
 //give default chart type
-var chart = new Chart(ctx, {type: type, data: data, options: options});
+var chart = new Chart(ctx, {type: type, data: data, options: regOptions});
 
 function makePieChart(){
-    chart.destroy();
     type = 'pie';
-    chart = new Chart(ctx, {type: type, data: data, options: options});
+    if(Object.keys(data).length == 0){ return; }
+    chart.destroy();
+    data.datasets[0].backgroundColor = getColors();
+    data.datasets[0].borderColor = getOutlines();
+    console.log("making " + type + " chart:", data);
+    chart = new Chart(ctx, {type: type, data: data, options: pieOptions});
 }
 function makeLineChart(){
-    chart.destroy();
     type = 'line';
-    chart = new Chart(ctx, {type: type, data: data, options: options});
+    if(Object.keys(data).length == 0){ return; }
+    chart.destroy();
+    data.datasets[0].backgroundColor = colors[0];
+    data.datasets[0].borderColor = outlines[0];
+    console.log("making " + type + " chart:", data);
+    chart = new Chart(ctx, {type: type, data: data, options: regOptions});
 }
 function makeBarChart(){
-    chart.destroy();
     type = 'bar';
-    chart = new Chart(ctx, {type: type, data: data, options: options});
+    if(Object.keys(data).length == 0){ return; }
+    chart.destroy();
+    data.datasets[0].backgroundColor = getColors();
+    data.datasets[0].borderColor = getOutlines();
+    console.log("making " + type + " chart:", data);
+    chart = new Chart(ctx, {type: type, data: data, options: regOptions});
 }
 function makeRadarChart(){
-    chart.destroy();
     type = 'radar';
-    chart = new Chart(ctx, {type: type, data: data, options: options});
+    if(Object.keys(data).length == 0){ return; }
+    chart.destroy();
+    data.datasets[0].backgroundColor = colors[0];
+    data.datasets[0].borderColor = outlines[0];
+    console.log("making " + type + " chart:", data);
+    chart = new Chart(ctx, {type: type, data: data, options: radarOptions});
 }
 function makePolarAreaChart(){
-    chart.destroy();
     type = 'polarArea';
-    chart = new Chart(ctx, {type: type, data: data, options: options});
+    if(Object.keys(data).length == 0){ return; }
+    chart.destroy();
+    data.datasets[0].backgroundColor = getColors();
+    data.datasets[0].borderColor = getOutlines();
+    console.log("making " + type + " chart:", data);
+    chart = new Chart(ctx, {type: type, data: data, options: pieOptions});
 }
 
 function saveIt(){
@@ -111,9 +189,48 @@ function submitForm(){
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    console.log("server response", xhttp.responseText);
-                    console.log("server response", JSON.parse(xhttp.responseText) );
+                    // console.log("server response", xhttp.responseText);
                     var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
+
+                    console.log("server response 1 ", serverResponse );
+
+                    data = serverResponse;
+
+                    chart.destroy();
+                    switch(type){
+                        case "radar":
+                            data.datasets[0].backgroundColor = colors[0];
+                            data.datasets[0].borderColor = outlines[0];
+                            chart = new Chart(ctx, {type: type, data: data, options: radarOptions});
+                            break;
+                        case "line":
+                            data.datasets[0].backgroundColor = colors[0];
+                            data.datasets[0].borderColor = outlines[0];
+                            chart = new Chart(ctx, {type: type, data: data, options: regOptions});
+                            break;
+                        case "bar":
+                            data.datasets[0].backgroundColor = getColors();
+                            data.datasets[0].borderColor = getOutlines();
+                            chart = new Chart(ctx, {type: type, data: data, options: regOptions});
+                            break;
+                        case "pie":
+                            data.datasets[0].backgroundColor = getColors();
+                            data.datasets[0].borderColor = getOutlines();
+                            chart = new Chart(ctx, {type: type, data: data, options: pieOptions});
+                            break;
+                        case "polarArea":
+                            data.datasets[0].backgroundColor = getColors();
+                            data.datasets[0].borderColor = getOutlines();
+                            chart = new Chart(ctx, {type: type, data: data, options: pieOptions});
+                            break;
+                        default:
+                            console.log("default of switch(type)");
+                    }
+                    
+                    // chart.update();
+
+                    console.log("new data:\n",data);
+
                 }else{
                     console.log("not good...");
                     console.log("this.readyState", this.readyState);
