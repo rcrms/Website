@@ -73,3 +73,11 @@ hr{
     margin-right: 5px;
     margin-left: 5px;
 }
+td{
+    margin: auto;
+    text-align: center; 
+}
+table{
+    width: 100%;
+
+}
