@@ -60,6 +60,9 @@ function createCSV(){
     console.log(formData);
     if(formData.county && formData.dataType && formData.fromDate && formData.groupBy && formData.toDate){//ready to query firebase
         //call getCSVData cloud function
+
+
+        
             //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
             var cloudFuncURL = "https://us-central1-firsttest-e58df.cloudfunctions.net/getCSVData";
             var params = "?county=" + formData.county + 
@@ -73,9 +76,20 @@ function createCSV(){
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    console.log("server response", xhttp.responseText);
-                    console.log("server response", JSON.parse(xhttp.responseText) );
-                    var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
+                    // console.log("server response", xhttp.responseText);
+                    // console.log("server response", JSON.parse(xhttp.responseText) );
+                    var serverResponse = JSON.parse(xhttp.responseText);
+                    console.log("server response:\n", serverResponse);
+                    var csvContent = "data:text/csv;charset=utf-8,";
+                    csvContent += serverResponse;
+
+                    var encodedUri = encodeURI(csvContent);
+                    var link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "reportsData.csv");
+                    document.body.appendChild(link);
+
+                    link.click();
                 }
             };
             xhttp.onerror = function(XMLHttpRequest, textStatus, errorThrown) {
@@ -242,6 +256,7 @@ function callScriptFunction(formData) {
         'resource': {
             'function': 'alterTemplate',
             'parameters':[
+                "Round 3",
                 formData
             ]
         }

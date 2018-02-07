@@ -57,8 +57,11 @@ function initMap() {
 
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: [],
-        map: heatmapMap
+        radius: 15,
+        opactiy: 1,
+        maxIntensity: 3
     });
+    heatmap.setMap(heatmapMap);
 }
 //region
 function toggleHeatmap() {
@@ -99,7 +102,7 @@ function changeOpacity() {
 
 var activeLocations = [];//info of each marker for display in a table below map area
 var activeLocationsIDs = [];//keys of each complaint to prevent duplicates
-
+var allMarkers = {};
 //use this to create the button in the infowindow which passes its ID to its onClick function
 function htmlToElement(html) {
     var template = document.createElement('template');
@@ -111,7 +114,7 @@ function handleMarkerDelete(complaintID){
     console.log("handleMarkerDelete()", complaintID);
 
     if(window.confirm("Are you sure you want to remove this complaint?")){
-        var whereToDelete = 'mapsPageTest/' + complaintID;
+        var whereToDelete = '/' + complaintID;
         firebase.database().ref(whereToDelete).remove()
         .then(function() {
             console.log("Removed " + complaintID);
@@ -119,6 +122,21 @@ function handleMarkerDelete(complaintID){
         .catch(function(error) {
             console.log("Remove failed: " + error.message);
         });
+
+        //reset heatmap
+        heatmap.getData().clear();
+        //remove marker from map
+        allMarkers[complaintID].setMap(null);
+        //remove ref to marker from obj
+        delete allMarkers[complaintID];
+        for(mark in allMarkers){//re-add all existing markers back into it
+            var currLat = allMarkers[mark].position.lat();
+            var currLng = allMarkers[mark].position.lng();
+            var point = new google.maps.LatLng(parseFloat(currLat), parseFloat(currLng));
+            heatmap.getData().push(point);//add point to heatmap
+        }
+        console.log("allMarkers{} ", allMarkers);
+        console.log("heatmap.getData() ", heatmap.getData());
     } else {
         console.log("you did not want to delete " + complaintID);
     }
@@ -127,201 +145,129 @@ function handleMarkerDelete(complaintID){
 //firebase stuff
 //region
 
-  // Initialize Firebase
 function updateMap(){
     var formData = getFormData();
     console.log(formData);
 
     if(formData.county && formData.dataType && formData.fromDate && formData.toDate){
         //call getMapData cloud function
-            //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
-            var cloudFuncURL = "https://us-central1-firsttest-e58df.cloudfunctions.net/getMapData";
-            var params = "?county=" + formData.county + 
-                         "&dataType=" + formData.dataType +
-                         "&fromDate=" + formData.fromDate +
-                         "&toDate=" + formData.toDate +
-                         "&key=" + cloudFuncKey;
+        //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+        var cloudFuncURL = "https://us-central1-firsttest-e58df.cloudfunctions.net/getMapData";
+        var params = "?county=" + formData.county + 
+                        "&dataType=" + formData.dataType +
+                        "&fromDate=" + formData.fromDate +
+                        "&toDate=" + formData.toDate +
+                        "&key=" + cloudFuncKey;
 
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    console.log("server response", xhttp.responseText);
-                    console.log("server response", JSON.parse(xhttp.responseText) );
-                    var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
-                    //all the code in the DB listener should be put here
-                    //to create all markers once the server responds with the data
-                    
-                    //example of how to parse response from server
-                    //region
-                    //the following block iterates over an object whose keys are objects themselves
-                    //'obj' is what the server will need to return from the http request
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log("server response", xhttp.responseText);
+                console.log("server response", JSON.parse(xhttp.responseText) );
+                var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
+                //all the code in the DB listener should be put here
+                //to create all markers once the server responds with the data
 
-                    obj = {
-                        "key1":{
-                            "age": 14,
-                            "name": "Tom"
-                        },
-                        "key2":{
-                            "age": 22,
-                            "name": "Josh"
-                        },
-                        "key3":{
-                            "age": 44,
-                            "name": "Tyler"
-                        }
-                    }
+                console.log("serverResponse before loop:\n", serverResponse);
 
-                    for (var key in obj) {      //'key' is the key of each object in 'obj'
-                        if (obj.hasOwnProperty(key)) {  //'key' is a real property of 'obj'
-                            console.log(key);
-                            for(var i in obj[key]){     //iterate over object pointed to by 'key' -> 'i' is a key
-                                console.log("\t" + i + " -> " +obj[key][i]);    //obj[key][i] is a value
-                            }
-                        }
-                    }
-                    /*
-                        OUTPUT:
-                            key1
-                                name -> Tom
-                                age -> 14
-                            key2
-                                name -> Josh
-                                age -> 22
-                            key3
-                                name -> Tyler
-                                age - >44
-
-                    */
-
-                    //endregion
-
-                }
-            };
-            xhttp.onerror = function(XMLHttpRequest, textStatus, errorThrown) {
-                console.log( 'The data failed to load :(' );
-                console.log(JSON.stringify(XMLHttpRequest));
-                console.log("textStatus", textStatus);
-                console.log("errorThrown", errorThrown);
-              };
-            var request = cloudFuncURL + params;
-            xhttp.open("GET", request, true);
-            xhttp.send();
-            console.log("http req url\n", request);
-        //parse http request response
-            //https://www.kirupa.com/html5/making_http_requests_js.htm
-        
-        //everything below this comment is the old way, use http request
-        
-        //retrieve data based on parameters
-        var DBref = firebase.database().ref('mapsPageTest');
-
-        // var div = document.getElementById('form');
-
-        DBref.on('value', 
-        //this func takes 3 arguements
-            //event
-            //event handler
-            //error handler
-            function gotData(data)
-            {
-                //clear any previous data held by the maps
+                //clear previous data
                 heatmap.getData().clear();
                 markerClusterer.clearMarkers();
-                // console.clear();
-                
-                var allObj = data.val();//gets JSON obj of all data at the level provided by ref()
-                var keys = Object.keys(allObj);//gets all keys for the same level
-                
-                for(i = 0; i < keys.length; i++)
-                {//set up marker for each complaint in database
-                    // console.log('iteration', i, 'of for-loop')
-                    var key = keys[i];//gets current key - submissionID
-                    var lat = allObj[key].lat;//gets current obj lat
-                    var lng = allObj[key].lng;//gets current obj lng
+                //for each record returned from http request, add location to both maps
+                for(var comp in serverResponse){
+                    if (serverResponse.hasOwnProperty(comp)){
 
-                    var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
-                    heatmap.getData().push(point);//add point to heatmap
-
-                    var marker = new google.maps.Marker({'position': point});
-                    marker.complaintKey = key;
-                    marker.addListener('click', function() {
+                        //create markers!
+                        // console.log("new complaint:\n");
+                        // console.log("lat: ", serverResponse[comp].lat);
+                        // console.log("lng: ", serverResponse[comp].lng);
+                        // console.log("addr: ", serverResponse[comp].wholeAddress);
+                        var addrComponents = serverResponse[comp].wholeAddress.split('|');
+                            /*
+                            addrComponents[0] -> FB_streetNum
+                            addrComponents[1] -> FB_streetName
+                            addrComponents[2] -> FB_town
+                            addrComponents[3] -> FB_state
+                            addrComponents[4] -> FB_zipcode
+                            //*/
+                        var lat = serverResponse[comp].lat;
+                        var lng = serverResponse[comp].lng;
                         
-                        if(lastInfoWindow){ //close the previously open infowindow
-                            lastInfoWindow.close();
-                        }
-                        var myPos = { //hold clicked marker location
-                            lat: Number(parseFloat(this.getPosition().lat() ).toFixed(6) ), 
-                            lng: Number(parseFloat(this.getPosition().lng() ).toFixed(6) )
-                        };
 
-                        //center map on marker
-                        markerMap.panTo(myPos);
-                        var myMarker = this;
+                        var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
+                        heatmap.getData().push(point);//add point to heatmap
 
-                        //start reverse geocoding
-                        var geocoder = new google.maps.Geocoder;
-                        geocoder.geocode({'location': myPos}, function(results, status) {
-                            if (status === 'OK') {
-                                if (results[0]) {
-                                    //grabs markers reverse geocoded address
-                                    number = results[0].address_components[0].short_name;
-                                    street = results[0].address_components[1].short_name;
-                                    town   = results[0].address_components[2].short_name;
+                        var marker = new google.maps.Marker({'position': point});
+                        //if any info was listed as 'undefined', set it to nothing
+                        marker.complaintKey  = comp;
+                        marker.FB_streetNum  = 
+                            (addrComponents[0] == "undefined") ? "" : addrComponents[0]
+                        marker.FB_streetName = 
+                            (addrComponents[1] == "undefined") ? "" : addrComponents[1]
+                        marker.FB_town       = 
+                            (addrComponents[2] == "undefined") ? "" : addrComponents[2]
+                        marker.FB_state      = 
+                            (addrComponents[3] == "undefined") ? "" : addrComponents[3]
+                        marker.FB_zipcode    = 
+                            (addrComponents[4] == "undefined") ? "" : addrComponents[4]
 
-                                    var complaintKey = myMarker.complaintKey;
-                                    //button inside infowindow
-                                    var buttonHTML = '<input type="button" value="Delete"' +
-                                        ' onclick="handleMarkerDelete(\'' + complaintKey + '\')">';
-                                    var infowindowButton = htmlToElement(buttonHTML);
-                                    //the rest of the content of infowindow
-                                    var content = "My lat: " + myPos.lat + "<br>" + 
-                                                "My loooong: " + myPos.lng + "<br>" +
-                                                "Key: " + complaintKey + "<br><br>" + 
-                                                number + " " + street + ", " +
-                                                town + "<br><br>" +
-                                                infowindowButton.outerHTML;  
-                                    
-                                    //actual infowindow obj
-                                    var infowindow = new google.maps.InfoWindow({
-                                        content: content
-                                    });
-                                    infowindow.open(markerMap, myMarker);
-                                    //save newly created infowindow to be closed upon another marker's click
-                                    lastInfoWindow = infowindow;
-
-                                    if(!activeLocationsIDs.includes(complaintKey)){
-                                        //maintains an array of all recently clicked markers
-                                        console.log('new active marker added', complaintKey);
-                                        activeLocationsIDs.push(complaintKey);
-                                        activeLocations.push({
-                                            number: number,
-                                            street: street,
-                                            town: town,
-                                            id: complaintKey
-                                        });
-                                    }
-                                    
-                                } else {
-                                    console.log('No geocoder results found.');
-                                }
-                            } else {
-                            console.log('Geocoder failed due to: ' + status);
+                        marker.addListener('click', function() {
+                            if(lastInfoWindow){ //close the previously open infowindow
+                                lastInfoWindow.close();
                             }
-                        });//end of geocoder.geocode() 
-            
-                    });//end of marker click listener
-
-                    //add newly created marker to its map
-                    markerClusterer.addMarker(marker);
-
-                }//end of for-loop
-
-            },//end of gotData() for firebase database connection
-            function gotError(e){
-                console.log("Error", e);
+                            var myPos = { //hold clicked marker location
+                                lat: Number(parseFloat(this.getPosition().lat() ).toFixed(6) ), 
+                                lng: Number(parseFloat(this.getPosition().lng() ).toFixed(6) )
+                            };
+                            //center map on marker
+                            markerMap.panTo(myPos);
+                            //var myMarker = this;
+                            // var complaintKey = this.complaintKey;
+                            var buttonHTML = '<input type="button" value="Delete"' +
+                                ' onclick="handleMarkerDelete(\'' + this.complaintKey + '\')">';
+                            var infowindowButton = htmlToElement(buttonHTML);
+                            //the rest of the content of infowindow
+                            var content = "My lat: " + myPos.lat + "<br>" + 
+                                        "My lng: " + myPos.lng + "<br>" +
+                                        "Key: " + this.complaintKey + "<br><br>" + 
+                                        this.FB_streetNum + " " + this.FB_streetName + ", " +
+                                        this.FB_town + " <br>" + this.FB_state + " " + 
+                                        this.FB_zipcode + "<br><br>" +
+                                        infowindowButton.outerHTML;  
+                            
+                            //actual infowindow obj
+                            var infowindow = new google.maps.InfoWindow({
+                                content: content
+                            });
+                            infowindow.open(markerMap, this);
+                            //save newly created infowindow to be closed upon another marker's click
+                            lastInfoWindow = infowindow;
+                        });//end of marker click event handler
+                        //add newly created marker to obj of all markers
+                        //allows handleMarkerDelete() to remove marker from map view
+                        allMarkers[comp] = marker;
+                        markerClusterer.addMarker(marker);
+                    }
+                }//end of for loop over serverResonse
+                /*for(mark in allMarkers){//re-add all existing markers back into it
+                    var currLat = allMarkers[mark].position.lat();
+                    var currLng = allMarkers[mark].position.lng();
+                    var point = new google.maps.LatLng(parseFloat(currLat), parseFloat(currLng));
+                    heatmap.getData().push(point);//add point to heatmap
+                }//*/
             }
-        );//end of DBref.on('value')
-    }
+        };//end of xhttp.onreadystatechange
+        xhttp.onerror = function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log( 'The data failed to load :(' );
+            console.log(JSON.stringify(XMLHttpRequest));
+            console.log("textStatus", textStatus);
+            console.log("errorThrown", errorThrown);
+            };
+        var request = cloudFuncURL + params;
+        xhttp.open("GET", request, true);
+        xhttp.send();
+        console.log("http req url\n", request);
+    }//end of data validation if statement
 }
 
 //endregion
@@ -332,7 +278,6 @@ function updateMap(){
 function toggleMaps(){
 //handles switching which of the two maps maintained is visible
 //upon switching maps, their center and zoom properties are synced
-//try playing with their Z-index properties to avoid the trigger(map, 'resize') syntax
     var firstMap = document.getElementById('map');
     var secondMap = document.getElementById('map2');//not used - could test the if below with both div class checks
 
