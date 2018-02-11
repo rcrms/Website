@@ -81,3 +81,34 @@ fieldset{
 .missingInfo{
     color: red;
 }
+#tableInteraction{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+tr:nth-child(2n) {
+    background: lightgray;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+table { 
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+td{
+    padding: 3px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    /* white-space:nowrap; */
+    /* word-wrap: break-word; */
+}
+td:nth-child(1), th:nth-child(1){
+    max-width: 25px;
+    width: 25px;
+}
+td:nth-child(2), th:nth-child(2), 
+td:nth-child(3), th:nth-child(3), 
+td:last-child,   th:last-child{
+    max-width: 100px;
+    width: 100px;
+}

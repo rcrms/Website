@@ -1,8 +1,79 @@
+/*
+things to note for the marker listing table
 
-//map init stuff
-//region
+-when creating checkboxes to insert into table:
+    +be sure to add a click listener to uncheck the big daddy checkbox if any checkbox is unchecked at any point
+    +give each checkbox the ID of the complaint they represent from the DB, so the code later may be able to query the DB with the checkbox's ID
+-be sure to trigger a new DB query by clicking the submit button in code whenever there is an interation with the data in the table to sync map with new interation
+-on clear all event, remove al tags from the table except the headings, then wait 500-800 ms before setting the div display to none
+
+
+//*/
+
+
+function insertMarkerIntoTable(marker){
+//accepts a google marker object
+//pull relavent data from the marker, insert that data into the table
+//remove hidden class
+    console.log('activeLocationsIDs before addition:', activeLocationsIDs);
+    if(!activeLocationsIDs.includes(marker.complaintKey)){
+        var table = document.getElementById('markerTable');
+        var trString = "<tr>" +
+            "<td><input type=\"checkbox\" id=\"" + marker.complaintKey + "\"></td> " +
+            "<td>" + parseFloat(marker.getPosition().lat() ).toFixed(6) + "</td> " +
+            "<td>" + parseFloat(marker.getPosition().lng() ).toFixed(6) + "</td> " +
+            "<td>" + marker.FB_streetNum + " " + marker.FB_streetName + "</td> " +
+            "<td>" + marker.FB_town + "</td> " +
+            "<td>" + marker.FB_county + "</td> " +
+            "<td>" + marker.FB_zipcode + "</td> " + "</tr>";
+        var newTr = htmlToElement(trString);
+        table.appendChild(newTr);
+        activeLocationsIDs.push(marker.complaintKey);    
+    }
+    console.log('activeLocationsIDs after addition:', activeLocationsIDs);
+    document.getElementById('tableDiv').classList.remove('hidden');
+}
+
+document.getElementById('checkAll').addEventListener('click', e => {
+//handle checking all checkboxes in table
+    if(document.getElementById('checkAll').checked){
+        console.log("check all of them");
+        var inputs = document.querySelectorAll("input[type='checkbox']");
+        for(var i = 0; i < inputs.length; i++) {
+            inputs[i].checked = true;   
+        }
+    }else{
+        console.log("UNcheck all of them");
+        var inputs = document.querySelectorAll("input[type='checkbox']");
+        for(var i = 0; i < inputs.length; i++) {
+            inputs[i].checked = false;   
+        }
+    }
+});
+document.getElementById('batchClear').addEventListener('click', e => {
+//remove all complaints from table
+    // var table = document.getElementById('markerTable');
+    // while(table.childNodes[1]){
+    //     table.removeChild(table.childNodes[1]);
+    // }
+
+    var elmtTable = document.getElementById('markerTable');
+    var tableRows = elmtTable.getElementsByTagName('tr');
+    var rowCount = tableRows.length;
+    
+    for (var x = rowCount - 1; x > 0; x--) {
+       elmtTable.removeChild(tableRows[x]);
+    }
+
+    activeLocationsIDs = [];
+    window.setTimeout(() => {
+        document.getElementById('tableDiv').classList.add('hidden');
+    }, 1000);
+    
+});
+
 function centerMap(){
-    //center map on user location
+//center map on user location as determined by the browser
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
             //data is found below, that's what initialLocation is set to
@@ -16,43 +87,37 @@ function centerMap(){
 }
 
 function getLocation(){
-    return {lat: 46.272131, lng: -84.450648};
+    return {lat: 46.493571, lng: -84.362886};
 }
 
 //global map vars so they can be accessed elsewhere
 var heatmapMap, heatmap, markerMap, markers, markerClusterer, lastInfoWindow;
 
 function initMap() {
-
-// clustered markers map variables
-
+//sets up both google maps, markerClusterer, then heatmap
     markerMap = new google.maps.Map(document.getElementById('map2'),{
         zoom: 17,
         center: getLocation(), 
             //{lat: 46.493990, lng: -84.362969} //middle of CAS
-        mapTypeId: 'roadmap' //options: roadmap, satellite, hybrid, terrain
+        mapTypeId: 'roadmap', //options: roadmap, satellite, hybrid, terrain
+        gestureHandling: 'cooperative'
     });
     
     var markers = [];
-    // Add a marker clusterer to manage the markers.
     var opt = {
         averageCenter: true,
         gridSize: 45
     };
     markerClusterer = new MarkerClusterer(markerMap, [], opt);
-    
 
-    //USE ANOTHER VERSION OF THE MARKERCLUSTERER - MARKERCLUSTERERPLUS
-    //https://htmlpreview.github.io/?https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/docs/examples.html
-    //http://htmlpreview.github.io/?https://github.com/googlemaps/v3-utility-library/blob/master/markerclustererplus/docs/reference.html
- 
-// heatmap variables
+    //////////////////////////////////////////////
 
     heatmapMap = new google.maps.Map(document.getElementById('map'), {
         zoom: 17,
         center: getLocation(),
         // center: {lat: 46.493990, lng: -84.362969}, //middle of CAS
-        mapTypeId: 'hybrid' //options: roadmap, satellite, hybrid, terrain
+        mapTypeId: 'hybrid', //options: roadmap, satellite, hybrid, terrain
+        gestureHandling: 'cooperative'
     });
 
     heatmap = new google.maps.visualization.HeatmapLayer({
@@ -63,7 +128,7 @@ function initMap() {
     });
     heatmap.setMap(heatmapMap);
 }
-//region
+
 function toggleHeatmap() {
     heatmap.setMap(heatmap.getMap() ? null : heatmapMap);
 }
@@ -96,21 +161,22 @@ function changeOpacity() {
     heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
 }
 
-//endregion
-
-//endregion
-
-var activeLocations = [];//info of each marker for display in a table below map area
-var activeLocationsIDs = [];//keys of each complaint to prevent duplicates
+//hold all firebase IDs of markers sent to the table, prevents adding a marker to the table twice
+var activeLocationsIDs = [];
+//maintains which points are being shown, when altered via map/table, it will update both maps
 var allMarkers = {};
-//use this to create the button in the infowindow which passes its ID to its onClick function
+
 function htmlToElement(html) {
+//create the button in the infowindow which passes its ID to its onClick function
     var template = document.createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
     return template.content.firstChild;
 }
 function handleMarkerDelete(complaintID){
+//removes complaint from DB represented by a marker on the map, 
+//then updates the heatmap version with remaining markers
+//this func is only called from a marker's infowindow
     console.log("handleMarkerDelete()", complaintID);
 
     if(window.confirm("Are you sure you want to remove this complaint?")){
@@ -142,33 +208,26 @@ function handleMarkerDelete(complaintID){
     }
 }
 
-//firebase stuff
-//region
-
 function updateMap(){
+//makes http request for data from firebase matching the form parameters
+//then adds all data in server response to both google maps
     var formData = getFormData();
     console.log(formData);
 
     if(formData.county && formData.dataType && formData.fromDate && formData.toDate){
         //call getMapData cloud function
-        //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
         var cloudFuncURL = "https://us-central1-firsttest-e58df.cloudfunctions.net/getMapData";
         var params = "?county=" + formData.county + 
                         "&dataType=" + formData.dataType +
                         "&fromDate=" + formData.fromDate +
                         "&toDate=" + formData.toDate +
                         "&key=" + cloudFuncKey;
-
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                console.log("server response", xhttp.responseText);
-                console.log("server response", JSON.parse(xhttp.responseText) );
+                // console.log("server response", xhttp.responseText);
+                // console.log("server response", JSON.parse(xhttp.responseText) );
                 var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
-                //all the code in the DB listener should be put here
-                //to create all markers once the server responds with the data
-
-                console.log("serverResponse before loop:\n", serverResponse);
 
                 //clear previous data
                 heatmap.getData().clear();
@@ -176,30 +235,19 @@ function updateMap(){
                 //for each record returned from http request, add location to both maps
                 for(var comp in serverResponse){
                     if (serverResponse.hasOwnProperty(comp)){
-
-                        //create markers!
-                        // console.log("new complaint:\n");
-                        // console.log("lat: ", serverResponse[comp].lat);
-                        // console.log("lng: ", serverResponse[comp].lng);
-                        // console.log("addr: ", serverResponse[comp].wholeAddress);
                         var addrComponents = serverResponse[comp].wholeAddress.split('|');
-                            /*
-                            addrComponents[0] -> FB_streetNum
-                            addrComponents[1] -> FB_streetName
-                            addrComponents[2] -> FB_town
-                            addrComponents[3] -> FB_state
-                            addrComponents[4] -> FB_zipcode
-                            //*/
                         var lat = serverResponse[comp].lat;
                         var lng = serverResponse[comp].lng;
+                        var county = serverResponse[comp].county;
                         
-
                         var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
                         heatmap.getData().push(point);//add point to heatmap
 
                         var marker = new google.maps.Marker({'position': point});
                         //if any info was listed as 'undefined', set it to nothing
                         marker.complaintKey  = comp;
+                        marker.FB_county = 
+                            (county == "undefined") ? "" : county
                         marker.FB_streetNum  = 
                             (addrComponents[0] == "undefined") ? "" : addrComponents[0]
                         marker.FB_streetName = 
@@ -242,6 +290,8 @@ function updateMap(){
                             infowindow.open(markerMap, this);
                             //save newly created infowindow to be closed upon another marker's click
                             lastInfoWindow = infowindow;
+
+                            insertMarkerIntoTable(this);
                         });//end of marker click event handler
                         //add newly created marker to obj of all markers
                         //allows handleMarkerDelete() to remove marker from map view
@@ -249,12 +299,6 @@ function updateMap(){
                         markerClusterer.addMarker(marker);
                     }
                 }//end of for loop over serverResonse
-                /*for(mark in allMarkers){//re-add all existing markers back into it
-                    var currLat = allMarkers[mark].position.lat();
-                    var currLng = allMarkers[mark].position.lng();
-                    var point = new google.maps.LatLng(parseFloat(currLat), parseFloat(currLng));
-                    heatmap.getData().push(point);//add point to heatmap
-                }//*/
             }
         };//end of xhttp.onreadystatechange
         xhttp.onerror = function(XMLHttpRequest, textStatus, errorThrown) {
@@ -269,11 +313,6 @@ function updateMap(){
         console.log("http req url\n", request);
     }//end of data validation if statement
 }
-
-//endregion
-
-//bottom stuff
-//region
 
 function toggleMaps(){
 //handles switching which of the two maps maintained is visible
@@ -303,9 +342,6 @@ function toggleMaps(){
     heatmapMap.panTo(m1center);
     markerMap.panTo(m2center);
 }
-
-//panel stuff
-//region
 
 function slideToggle() {
     //get child div w/ class of slider
@@ -392,6 +428,3 @@ function getFormData(){
         toDate: toDate
     }
 }
-//endregion
-
-//endregion

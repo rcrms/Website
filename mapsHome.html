@@ -191,6 +191,32 @@
                 </form>
             </div><!-- end of form div -->
         </div><!-- end of bottom div -->
+        <div class="hidden" id="tableDiv">
+            <br> <hr> <br>
+
+            <div id="tableInteraction">
+                <div>
+                    <input type="checkbox" name="checkAll" id="checkAll">
+                    <label for="checkAll">Check All</label>
+                </div>
+
+                <button title="Delete checked complaints." id="batchDelete">Delete</button>
+                <button title="Resolve checked complaints." id="batchResolve">Resolve</button>
+                <button title="Unresolve checked complaints." id="batchUnresolve">Unresolve</button>
+                <button title="Clear checked complaints." id="batchClear">Clear</button>
+            </div> <br>
+            <table id="markerTable">
+                <tr>
+                    <th></th>
+                    <th>Lat</th>
+                    <th>Lng</th>
+                    <th>Address</th>
+                    <th>Town</th>
+                    <th>County</th>
+                    <th>Zip</th>
+                </tr>
+            </table>
+        </div>
     </div><!-- end of content div -->
 
     <script src="markerClusterer.js"></script>
