@@ -88,6 +88,8 @@ var pieOptions = {
     }
 };
 var data = {};
+
+
 /*
 var data = {
     //labels: [],
@@ -171,7 +173,7 @@ function saveIt(){
 function submitForm(){
     
     var formData = getFormData();
-
+    console.log(formData);
     console.log(formData);
 
     if(formData.county && formData.dataType && formData.fromDate && formData.groupBy && formData.toDate){//ready to query firebase
@@ -189,13 +191,21 @@ function submitForm(){
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    // console.log("server response", xhttp.responseText);
+                    console.log("server response", xhttp.responseText);
                     var serverResponse = JSON.parse(xhttp.responseText);//object to iterate through
 
                     console.log("server response 1 ", serverResponse );
-
                     data = serverResponse;
-
+                    
+                    data.datasets[0].data.length = data.labels.length;
+                    for(i in data.labels)
+                    {
+                        if (data.datasets[0].data[i] == undefined)
+                        {
+                            data.datasets[0].data[i] = 0;
+                        }
+                    }
+  
                     chart.destroy();
                     switch(type){
                         case "radar":
