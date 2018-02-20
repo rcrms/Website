@@ -7,7 +7,7 @@ things to note for the marker listing table
 -be sure to trigger a new DB query by clicking the submit button in code whenever there is an interation with the data in the table to sync map with new interation
 -on clear all event, remove al tags from the table except the headings, then wait 500-800 ms before setting the div display to none
 
-
+-+-+- if, when a marker is deleted using it's infowindow button, it's ID is contained within the activeLocationsIDs array, remove it from the array as well as the table. This way we dont get accidental updates to items that dont exit.
 //*/
 
 
@@ -16,10 +16,10 @@ function insertMarkerIntoTable(marker){
 //pull relavent data from the marker, insert that data into the table
 //remove hidden class
     console.log('activeLocationsIDs before addition:', activeLocationsIDs);
-    if(!activeLocationsIDs.includes(marker.complaintKey)){
+    if(!activeLocationsIDs.includes(marker.FB_key)){
         var table = document.getElementById('markerTable');
         var trString = "<tr>" +
-            "<td><input type=\"checkbox\" id=\"" + marker.complaintKey + "\"></td> " +
+            "<td><input type=\"checkbox\" id=\"" + marker.FB_key + "\"></td> " +
             "<td>" + parseFloat(marker.getPosition().lat() ).toFixed(6) + "</td> " +
             "<td>" + parseFloat(marker.getPosition().lng() ).toFixed(6) + "</td> " +
             "<td>" + marker.FB_streetNum + " " + marker.FB_streetName + "</td> " +
@@ -28,11 +28,123 @@ function insertMarkerIntoTable(marker){
             "<td>" + marker.FB_zipcode + "</td> " + "</tr>";
         var newTr = htmlToElement(trString);
         table.appendChild(newTr);
-        activeLocationsIDs.push(marker.complaintKey);    
+        activeLocationsIDs.push(marker.FB_key);    
     }
     console.log('activeLocationsIDs after addition:', activeLocationsIDs);
     document.getElementById('tableDiv').classList.remove('hidden');
 }
+
+document.getElementById('batchDelete').addEventListener('click', e => {
+//delete all checked records from Firebase
+    
+    var IDs = getCheckboxIDs();
+    if(confirm("Are you sure you wish to delete all checked records?")){
+        for(id in IDs){
+            var markerObj = allMarkers[IDs[id]];//marker obj -> get relavent props and do set query
+    
+            var key = markerObj.FB_key;
+            firebase.database().ref("/" + key).remove();
+            removeTableRow(IDs[id]);
+        }
+    }else{
+        window.alert("You spared them!");
+    }
+});
+
+document.getElementById('batchResolve').addEventListener('click', e => {
+//alter all records in Firebase to contain "resolved" as a status
+    
+    var IDs = getCheckboxIDs();
+
+    for(id in IDs){
+        var markerObj = allMarkers[IDs[id]];//marker obj -> get relavent props and do set query
+
+        var key                 = markerObj.FB_key;
+        var newStatus           = "resolved";
+
+        var newStatusDate       = markerObj.FB_status_date.split("_");
+        newStatusDate[0] = "resolved";
+        newStatusDate = newStatusDate.join("_");
+
+        var newStatusCountyDate = markerObj.FB_status_county_date.split("_");
+        newStatusCountyDate[0]  = "resolved";
+        newStatusCountyDate = newStatusCountyDate.join("_");
+
+        console.log("new info for " + key);
+        console.log("\tnewStatus:", newStatus);
+        console.log("\tnewStatusDate:", newStatusDate);
+        console.log("\tnewStatusCountyDate:", newStatusCountyDate);
+
+        firebase.database().ref("/" + key).update({
+            status : newStatus,
+            status_date : newStatusDate,
+            status_county_date : newStatusCountyDate
+        });
+        removeTableRow(IDs[id]);
+    }
+});
+
+document.getElementById('batchUnresolve').addEventListener('click', e => {
+//alter all records in Firebase to contain "unresolved" as a status
+
+    var IDs = getCheckboxIDs();
+
+    for(id in IDs){
+        var markerObj = allMarkers[IDs[id]];//marker obj -> get relavent props and do set query
+
+        var key                 = markerObj.FB_key;
+        var newStatus           = "unresolved";
+
+        var newStatusDate       = markerObj.FB_status_date.split("_");
+        newStatusDate[0] = "unresolved";
+        newStatusDate = newStatusDate.join("_");
+
+        var newStatusCountyDate = markerObj.FB_status_county_date.split("_");
+        newStatusCountyDate[0]  = "unresolved";
+        newStatusCountyDate = newStatusCountyDate.join("_");
+
+        console.log("new info for " + key);
+        console.log("\tnewStatus:", newStatus);
+        console.log("\tnewStatusDate:", newStatusDate);
+        console.log("\tnewStatusCountyDate:", newStatusCountyDate);
+
+        firebase.database().ref("/" + key).update({
+            status : newStatus,
+            status_date : newStatusDate,
+            status_county_date : newStatusCountyDate
+        });
+        removeTableRow(IDs[id]);
+    }
+    
+});
+
+document.getElementById('logButton').addEventListener('click', e => {
+    var checkboxes = document.querySelectorAll("input[type='checkbox']");
+    //console.log("before loop", checkboxes);
+    var allIDs = [];
+    for (box in checkboxes){
+        if(checkboxes[box].id && checkboxes[box].id != "checkAll" && checkboxes[box].checked){
+            //if the child is a checkbox, not checkAll, and is checked -> hold it
+            console.log(checkboxes[box].id.toString());
+            allIDs.push(checkboxes[box].id.toString());
+        }
+
+    // console.log("allIDs #",box, ": ", allIDs[box]);
+    }
+    //allIDs now contains all keys for all checked complaints
+    console.log("allIDs: ", allIDs);
+    // return allIDs;
+    for(id in allIDs){
+        var key = allIDs[id];
+        var obj = allMarkers[key];
+        console.log("allMarkers[", id, "]: ");
+        console.log("\tFB_status:", obj.FB_status);
+        console.log("\tFB_status_date:", obj.FB_status_date);
+        console.log("\tFB_status_county_date:", obj.FB_status_county_date);
+
+    }
+
+});
 
 document.getElementById('checkAll').addEventListener('click', e => {
 //handle checking all checkboxes in table
@@ -68,7 +180,8 @@ document.getElementById('batchClear').addEventListener('click', e => {
     activeLocationsIDs = [];
     window.setTimeout(() => {
         document.getElementById('tableDiv').classList.add('hidden');
-    }, 1000);
+        document.getElementById('checkAll').checked = false;
+    }, 1300);
     
 });
 
@@ -235,17 +348,28 @@ function updateMap(){
                 //for each record returned from http request, add location to both maps
                 for(var comp in serverResponse){
                     if (serverResponse.hasOwnProperty(comp)){
-                        var addrComponents = serverResponse[comp].wholeAddress.split('|');
-                        var lat = serverResponse[comp].lat;
-                        var lng = serverResponse[comp].lng;
-                        var county = serverResponse[comp].county;
+                        var addrComponents     = serverResponse[comp].wholeAddress.split('|');
+                        var lat                = serverResponse[comp].lat;
+                        var lng                = serverResponse[comp].lng;
+                        var county             = serverResponse[comp].county;
+                        var status             = serverResponse[comp].status;
+                        var status_county_date = serverResponse[comp].status_county_date;
+                        var status_date        = serverResponse[comp].status_date;
+
                         
                         var point = new google.maps.LatLng(parseFloat(lat), parseFloat(lng));
                         heatmap.getData().push(point);//add point to heatmap
 
                         var marker = new google.maps.Marker({'position': point});
                         //if any info was listed as 'undefined', set it to nothing
-                        marker.complaintKey  = comp;
+                        marker.FB_key  = comp;
+
+                        //hold these three for updating purposes
+                        marker.FB_status = status;
+                        marker.FB_status_county_date = status_county_date;
+                        marker.FB_status_date = status_date;
+
+                        //hold the rest for display in the table
                         marker.FB_county = 
                             (county == "undefined") ? "" : county
                         marker.FB_streetNum  = 
@@ -270,14 +394,14 @@ function updateMap(){
                             //center map on marker
                             markerMap.panTo(myPos);
                             //var myMarker = this;
-                            // var complaintKey = this.complaintKey;
+                            // var FB_key = this.FB_key;
                             var buttonHTML = '<input type="button" value="Delete"' +
-                                ' onclick="handleMarkerDelete(\'' + this.complaintKey + '\')">';
+                                ' onclick="handleMarkerDelete(\'' + this.FB_key + '\')">';
                             var infowindowButton = htmlToElement(buttonHTML);
                             //the rest of the content of infowindow
                             var content = "My lat: " + myPos.lat + "<br>" + 
                                         "My lng: " + myPos.lng + "<br>" +
-                                        "Key: " + this.complaintKey + "<br><br>" + 
+                                        "Key: " + this.FB_key + "<br><br>" + 
                                         this.FB_streetNum + " " + this.FB_streetName + ", " +
                                         this.FB_town + " <br>" + this.FB_state + " " + 
                                         this.FB_zipcode + "<br><br>" +
@@ -427,4 +551,27 @@ function getFormData(){
         fromDate: fromDate,
         toDate: toDate
     }
+}
+
+function getCheckboxIDs(){
+    var checkboxes = document.querySelectorAll("input[type='checkbox']");
+    //console.log("before loop", checkboxes);
+    var allIDs = [];
+    for (box in checkboxes){
+        if(checkboxes[box].id && checkboxes[box].id != "checkAll" && checkboxes[box].checked){
+            //if the child is a checkbox, not checkAll, and is checked -> hold it
+            console.log(checkboxes[box].id.toString());
+            allIDs.push(checkboxes[box].id.toString());
+        }
+
+    // console.log("allIDs #",box, ": ", allIDs[box]);
+    }
+    //allIDs now contains all keys for all checked complaints
+    // console.log("allIDs: ", allIDs);
+    return allIDs;
+}
+
+function removeTableRow(elID){
+    var removingTR = document.getElementById('elID').parentNode.parentNode;
+    removingTR.parentNode.removeChild(removingTR);
 }
