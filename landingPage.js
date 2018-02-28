@@ -112,9 +112,7 @@ function batchDelete(){
     var objArr = [];
 
       for(i = 0; i < keys.length; i++)
-        {
-            
-            
+        {           
             key = keys[i];//gets current key - submissionID
             var status = allObj[key].status;
             console.log(status);
@@ -125,14 +123,9 @@ function batchDelete(){
 
                //database.remove();
             }
-
             else{
                 debugger;
-            }
-
-           
-
-            
+            }       
         }
         txt = "Successfully removed all resolved complaints. "
         console.log('returning.');
