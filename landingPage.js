@@ -61,6 +61,8 @@ function displayTicker(arr){
     }
 }
 
+
+
 const database = firebase.database().ref('/');
 
 database.orderByChild('date_time').startAt('0').on("value", 
@@ -76,6 +78,7 @@ data => {
         var lng = allObj[key].lng;//gets current obj name
         var date_time = allObj[key].date_time;
     }
+
     //objArr is now an array with all my objects and can use array sorting
     objArr.sort((a,b) => {
         var aDate = a.date_time.split("_")[0];
@@ -95,4 +98,49 @@ data => {
 
 }, err => {
     console.log("error callback: ", err);
-});
+})
+
+function batchDelete(){
+
+    document.getElementById("delete").addEventListener("click", function(event){
+        event.preventDefault();
+    })
+    database.orderByChild('status').equalTo('resolved').on("value", 
+    data => {
+    var allObj = data.val();//gets JSON obj of all data at the level provided by ref()
+    var keys = Object.keys(allObj);//gets all keys for the same level
+    var objArr = [];
+
+      for(i = 0; i < keys.length; i++)
+        {
+            
+            
+            key = keys[i];//gets current key - submissionID
+            var status = allObj[key].status;
+            console.log(status);
+            if(status == "resolved")
+            {
+                var statusRef = database.child(key);                
+                statusRef.remove();
+
+               //database.remove();
+            }
+
+            else{
+                debugger;
+            }
+
+           
+
+            
+        }
+        txt = "Successfully removed all resolved complaints. "
+        console.log('returning.');
+        return;
+  
+    });
+
+    return;
+}
+
+

@@ -53,12 +53,15 @@ img#chartIcon, img#reportIcon{
     max-height: 50px;
     max-width: 50px;
 }
-img#mapIcon{
+img#mapIcon, img#deleteIcon{
     height:45%;
     width: 45%;
     max-height: 55px;
     max-width: 55px;
 }
+
+
+
 hr{
     margin: 0px 10px 0px 10px;
 }
