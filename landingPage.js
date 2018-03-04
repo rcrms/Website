@@ -123,12 +123,10 @@ function batchDelete(){
 
                //database.remove();
             }
-            else{
-                debugger;
-            }       
+       
         }
-        txt = "Successfully removed all resolved complaints. "
-        console.log('returning.');
+    
+        location.reload();
         return;
   
     });
