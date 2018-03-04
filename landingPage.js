@@ -127,8 +127,6 @@ function batchDelete(){
         }
     
         location.reload();
-        return;
-  
     });
 
     return;
