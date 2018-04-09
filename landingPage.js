@@ -1,5 +1,75 @@
+/////////////////////////////
+//START NOTIFICATIONS BLOCK//
+/////////////////////////////
+/*
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+    console.log('Service Worker and Push is supported');
+  
+    navigator.serviceWorker.register('firebase-messaging-sw.js')
+    .then(function(swReg) {
+      console.log('Service Worker is registered', swReg);
+  
+      swRegistration = swReg;
+    })
+    .catch(function(error) {
+      console.error('Service Worker Error', error);
+    });
+  } else {
+    console.warn('Push messaging is not supported');
+    pushButton.textContent = 'Push Not Supported';
+  }
+*/
+  
+const applicationServerPublicKey = 'BF1FkbfqF3AB_lw-a7pmxjemdwsUbMd2FzE4ssHAs7iyWu1R_ByY1933CVc0X838FHRnhdGzmWYzS4k2r2ThGEo';  
 const numberInTicker = 5;
+const messaging = firebase.messaging();
+//Requesting user permission to enable notifications
+/*
+messaging.requestPermission()
+.then(function() {
+    console.log("Permissions granted.");
+    //Retrieving messaging token
+    messaging.getToken();
+})
+.then(function(token) {
+    //Testing to make sure token was received
+    console.log(token);
+})
+.catch(function(err) {
+    console.log("ERROR!", err);
+})
+  // Get Instance ID token. Initially this makes a network call, once retrieved
+  // subsequent calls to getToken will return from cache.
+  messaging.getToken().then(function(currentToken) {
+    if (currentToken) {
+      sendTokenToServer(currentToken);
+      updateUIForPushEnabled(currentToken);
+    } else {
+      // Show permission request.
+      console.log('No Instance ID token available. Request permission to generate one.');
+      // Show permission UI.
+      updateUIForPushPermissionRequired();
+      setTokenSentToServer(false);
+    }
+  }).catch(function(err) {
+    console.log('An error occurred while retrieving token. ', err);
+    showToken('Error retrieving Instance ID token. ', err);
+    setTokenSentToServer(false);
+  });
+// Handle incoming messages. Called when:
+// - a message is received while the app has focus
+// - the user clicks on an app notification created by a service worker
+//   `messaging.setBackgroundMessageHandler` handler.
+messaging.onMessage(function(payload) {
+    console.log('Message received. ', payload);
+    // ...
+  });
+*/  
 
+
+///////////////////////////
+//END NOTIFICATIONS BLOCK//
+///////////////////////////
 function createTableHeading(){
     var tr = document.createElement('tr');
     var head1 = document.createElement('th');
@@ -100,6 +170,14 @@ data => {
     console.log("error callback: ", err);
 })
 
+
+  // Retrieve new posts as they are added and display via js alertbox
+  //Note: The extra spacing is necessary, chrome will not display 
+database.once("child_added", function(snapshot) {
+    var newComplaint = snapshot.val();
+    alert("                             New complaint received at: \n" + newComplaint.wholeAddress)
+  });
+
 function batchDelete(){
 
     document.getElementById("delete").addEventListener("click", function(event){
@@ -112,7 +190,9 @@ function batchDelete(){
     var objArr = [];
 
       for(i = 0; i < keys.length; i++)
-        {           
+        {
+            
+            
             key = keys[i];//gets current key - submissionID
             var status = allObj[key].status;
             console.log(status);
@@ -120,13 +200,13 @@ function batchDelete(){
             {
                 var statusRef = database.child(key);                
                 statusRef.remove();
-
                //database.remove();
             }
-       
+  
         }
-    
         location.reload();
+       
+  
     });
 
     return;
